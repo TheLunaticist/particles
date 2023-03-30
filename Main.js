@@ -1,14 +1,16 @@
 window.SPAWN_RANGE = 30;
 window.PARTICLE_NUMBER = 100;
-window.START_VEL = 0.5;
+window.START_VEL = 2;
 window.PARTICLE_MASS = 3;
 window.MAX_VEL = 1;
 
 window.MAX_FORCE = 5;
 
+window.PARTICLE_RADIUS = 10;
+
 window.particles = [window.PARTICLE_NUMBER];
 window.canvas = document.getElementById("canvas");
-window.dContext = canvas.getContext("2d");
+window.dContext = window.canvas.getContext("2d");
 
 
 class Particle {
@@ -30,23 +32,29 @@ class Particle {
 		//gravity
 		this.vel.y += 0.01
 		
-		this.vel.x += 2 * 0.1 * Math.random() - 0.1;
-		
-		if(this.pos.y > canvas.height - 10 && this.vel.y > 0) {
-			this.vel.y = -10;
+		//collision
+		for(i = 0; i < PARTICLE_NUMBER; i++) {
+			if(i != ownId) {
+				let vecToParticle = Vector2.subtract(particles[i].pos, this.pos);
+				let dist = vecToParticle.getLength();
+				if(dist < window.PARTICLE_RADIUS * 2) {
+					Vector2.subtract(this.vel, Vector2.scaleVec(vecToParticle, 2));
+				}
+			}
 		}
+		
 	}
 	
 	move() {
 		this.pos = Vector2.add(this.pos, this.vel);
 		if(this.pos.x < 0) {
-			this.pos.x += canvas.width;
+			this.vel.x = -this.vel.x;
 		} else if(this.pos.x > canvas.width) {
 			this.pos.x -= canvas.width;
 		} else if(this.pos.y < 0) {
 			this.pos.y += canvas.height;
 		} else if(this.pos.y > canvas.height) {
-			this.pos.y = canvas.height;
+			this.vel.y = -this.vel.y;
 		}
 	}
 }
