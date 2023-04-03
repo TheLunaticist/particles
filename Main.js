@@ -224,9 +224,6 @@ class Projectile extends Entity {
 	update(index) {
 		this.rect.upperLeft.x += this.vel.x;
 		this.rect.upperLeft.y += this.vel.y;
-		
-		console.log("updating " + index);
-		console.log(this.vel.getLength());
 	}
 }
 
