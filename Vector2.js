@@ -1,16 +1,25 @@
 class Vector2 {
 	constructor(x, y) {
+		if(typeof(x) != "number" || typeof(y) != "number") {
+			let err = new Error();
+			console.log(err.stack);
+			debugger;
+		}
 		this.x = x;
 		this.y = y;
 	}
 	
 	getLength() {
-		return Math.sqrt(Math.pow(this.x, 2), Math.pow(this.y, 2));
+		return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
 	}
 	
 	getNormalized() {
 		let length = this.getLength();
 		return new Vector2(this.x / length, this.y / length);
+	}
+	
+	isValid() {
+		return !isNaN(this.x) && !isNaN(this.y);
 	}
 	
 	static add(vectorA, vectorB) {
