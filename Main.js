@@ -67,6 +67,7 @@ class GameState {
 			this.enemyCooldown--;
 		}
 		
+		//money
 		if(this.moneyCooldown < 1) {
 			this.money += GameState.MONEY_GAIN;
 			this.moneyCooldown = GameState.MAX_MONEY_COOLDOWN;
@@ -79,6 +80,14 @@ class GameState {
 			enemy.update();
 		});
 		
+		this.projectiles.forEach((projectile, index, object) => {
+			projectile.update(index);
+		});
+		
+		this.towers.forEach((tower, index, object) => {
+			tower.update();
+		});
+		
 		//collision
 		this.enemies.forEach((enemy, index, object) => {
 			if(enemy.doesEntityCollideWith(this.hq)) {
@@ -87,13 +96,16 @@ class GameState {
 			}
 		});
 		
-		this.projectiles.forEach((projectile, index, object) => {
-			projectile.update(index);
+		this.enemies.forEach((enemy, eIndex) => {
+			for(let i = 0; i < this.projectiles.length; i++) {
+				if(enemy.doesEntityCollideWith(this.projectiles[i])) {
+					this.enemies.splice(eIndex, 1);
+					this.projectiles.splice(i, 1);
+				}
+			}
 		});
 		
-		this.towers.forEach((tower, index, object) => {
-			tower.update();
-		});
+		
 	}
 }
 
@@ -222,6 +234,13 @@ class Projectile extends Entity {
 	}
 	
 	update(index) {
+		//top
+		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
+		this.rect.right < 0 || this.rect.left > canvas.width) {
+				window.gameState.projectiles.splice(index, 1);
+		}
+		
+		
 		this.rect.upperLeft.x += this.vel.x;
 		this.rect.upperLeft.y += this.vel.y;
 	}
