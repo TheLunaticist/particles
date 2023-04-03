@@ -4,6 +4,12 @@ window.ctx = window.canvas.getContext("2d");
 window.COLLIDER_SHAPE_SQUARE = 0;
 window.COLLIDER_SHAPE_CIRCLE = 1;
 
+window.hqSprite = new Image();
+window.hqSprite.src = "hq.png";
+
+window.projectileSprite = new Image();
+window.projectileSprite.src = "cannonBall.png";
+
 class GameState {
 	static MAX_ENEMY_COOLDOWN = 180;
 	
@@ -172,7 +178,7 @@ class HQ extends Entity {
 	
 	draw() {
 		window.ctx.fillStyle = "red";
-		window.ctx.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
+		window.ctx.drawImage(window.hqSprite, this.rect.left, this.rect.top);
 	}
 }
 
@@ -210,7 +216,7 @@ class Tower extends Entity {
 	tryShoot() {
 		if(window.gameState.enemies[0] != undefined) {
 			let vecToEnemy = Vector2.subtract(window.gameState.enemies[0].rect.getCenter(), this.rect.getCenter());
-			let speedToEnemy = vecToEnemy.getNormalized();
+			let speedToEnemy = Vector2.scaleVec(vecToEnemy.getNormalized(), 3);
 			let myCenter = this.rect.getCenter();
 			
 			window.gameState.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y));
@@ -221,7 +227,7 @@ class Tower extends Entity {
 }
 
 class Projectile extends Entity {
-	static SIZE = new Vector2(8, 8);
+	static SIZE = new Vector2(16, 16);
 	
 	constructor(x, y, asCenter, startVelX, startVelY) {
 		super(x, y, asCenter, Projectile.SIZE.x, Projectile.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
@@ -230,7 +236,7 @@ class Projectile extends Entity {
 	
 	draw() {
 		window.ctx.fillStyle = "blue";
-		window.ctx.fillRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+		window.ctx.drawImage(window.projectileSprite, this.rect.left, this.rect.top);
 	}
 	
 	update(index) {
