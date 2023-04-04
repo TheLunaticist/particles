@@ -11,28 +11,30 @@ window.projectileSprite = new Image();
 window.projectileSprite.src = "cannonBall.png";
 
 class GameState {
-	static MAX_ENEMY_COOLDOWN = 180;
+	static GAME_STAGE_RUNNING = 0;
+	static GAME_STAGE_LOST = 1;
 	
 	static MAX_MONEY_COOLDOWN = 300;
-	static MONEY_GAIN = 10;
+	static MONEY_GAIN = 50;
 	
-	constructor(startHealth) {
-		this.placementAttemptPosition = undefined;
+	static PLAYER_START_HEALTH = 200;
+	
+	start() {
+		this.gameStage = GameState.GAME_STAGE_RUNNING;
 		
-		this.playerHealth = startHealth;
+		this.projectiles = [];
 		this.enemies = [];
 		this.towers = [];
-		this.projectiles = [];
-		this.money = 0;
 		
-		this.enemyCooldown = 0;
-		this.moneyCooldown = 0;
+		this.playerHealth = GameState.PLAYER_START_HEALTH;
+		this.moneyCooldown = GameState.MAX_MONEY_COOLDOWN;
+		this.money = 40;
 	}
 	
 	init() {
 		//TODO query placement
 		this.hq = new HQ(window.canvas.width / 2, window.canvas.height / 2, true);
-		this.towers[0] = new Tower(this.hq.rect.right + 10, canvas.height / 2, false);
+		WaveManager.init();
 	}
 	
 	draw() {
@@ -58,19 +60,25 @@ class GameState {
 	}
 	
 	update() {
+		if(this.gameStage == GameState.GAME_STAGE_RUNNING) {
+			this.runGame();
+			this.draw();
+		} else {
+			GUIRenderer.drawEnd();
+		}
+	}
+	
+	runGame() {
+		WaveManager.update();
+		
 		//placing tower
 		//TODO check for collisions
 		if(this.placementAttemptPosition != undefined) {
-			this.towers.push(new Tower(window.mouseX, window.mouseY, true));
+			if(Tower.canPlace(window.mouseX, window.mouseY)) {
+				window.gameState.money -= Tower.COST;
+				this.towers.push(new Tower(window.mouseX, window.mouseY, true));
+			}
 			this.placementAttemptPosition = undefined;
-		}
-		
-		//spawning enemies
-		if(this.enemyCooldown < 1) {
-			this.enemies.push(new Enemy(window.canvas.width, window.canvas.height, true));
-			this.enemyCooldown = GameState.MAX_ENEMY_COOLDOWN;
-		} else {
-			this.enemyCooldown--;
 		}
 		
 		//money
@@ -97,8 +105,12 @@ class GameState {
 		//collision
 		this.enemies.forEach((enemy, index, object) => {
 			if(enemy.doesEntityCollideWith(this.hq)) {
-				window.gameState.playerHealth -= 10;
+				this.playerHealth -= 10;
 				this.enemies.splice(index, 1);
+				
+				if(this.playerHealth <= 0) {
+					this.gameStage = GameState.GAME_STAGE_LOST;
+				}
 			}
 		});
 		
@@ -107,11 +119,10 @@ class GameState {
 				if(enemy.doesEntityCollideWith(this.projectiles[i])) {
 					this.enemies.splice(eIndex, 1);
 					this.projectiles.splice(i, 1);
+					window.gameState.money += 10;
 				}
 			}
 		});
-		
-		
 	}
 }
 
@@ -133,6 +144,66 @@ class GUIRenderer {
 		let drawStringMoney = "money: " + window.gameState.money;
 		let measure = window.ctx.measureText(drawStringMoney);
 		window.ctx.fillText(drawStringMoney, window.canvas.width - measure.width - this.offset, measure.actualBoundingBoxAscent + this.offset);
+	}
+	
+	static drawEnd() {
+		window.ctx.fillStyle = "red";
+		window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
+		
+		window.ctx.fillStyle = "black";
+		window.ctx.font = "100px Orbitron";
+		window.ctx.textBaseline = "alphabetic";
+		let endText = "Game Over";
+		let textBox = window.ctx.measureText(endText);
+		let textX = window.canvas.width / 2 - textBox.width / 2;
+		let textY = window.canvas.height / 2 + textBox.actualBoundingBoxAscent / 2;
+		window.ctx.fillText(endText, textX, textY);
+	}
+}
+
+class WaveManager {
+	static timePassed = 0;
+	static waveCooldown = 600;
+	
+	static MAX_WAVE_TIME = 100;
+	static BASE_WAVE_AMOUNT = 5;
+	static MAX_SPREAD_RADIUS = 5;
+	
+	static WORLD_CENTER;
+	static ON_SCREEN_LENGTH;
+	
+	static init() {
+		WaveManager.WORLD_CENTER = new Vector2(canvas.width / 2, canvas.height / 2);
+		WaveManager.ON_SCREEN_LENGTH = Math.sqrt(Math.pow(canvas.width / 2, 2) + Math.pow(canvas.height / 2, 2));
+	}
+	
+	static update() {
+		if(WaveManager.waveCooldown < 1) {
+			//do wave
+			WaveManager.spawnWave();
+			//TODO time passed bonus
+			WaveManager.waveCooldown = WaveManager.MAX_WAVE_TIME;
+		} else {
+			WaveManager.waveCooldown--;
+		}
+		
+		WaveManager.timePassed += 1;		
+	}
+	
+	static spawnWave() {
+		let radOfDirection = 2*Math.PI * Math.random();
+		let unitVector = new Vector2(Math.cos(radOfDirection), Math.sin(radOfDirection));
+		
+		let center = Vector2.scaleVec(unitVector, WaveManager.ON_SCREEN_LENGTH + WaveManager.MAX_SPREAD_RADIUS);
+		
+		for(let i = 0; i < WaveManager.BASE_WAVE_AMOUNT; i++) {
+			let radOfSub = 2*Math.PI * Math.random();
+			let uVector = new Vector2(Math.cos(radOfSub), Math.sin(radOfSub));
+			
+			let offset = Vector2.scaleVec(uVector, WaveManager.MAX_SPREAD_RADIUS);
+			
+			window.gameState.enemies.push(new Enemy(center.x + offset.x, center.y + offset.y, true));
+		}
 	}
 }
 
@@ -185,10 +256,30 @@ class HQ extends Entity {
 class Tower extends Entity {
 	static SIZE = new Vector2(25, 25);
 	static MAX_SHOOT_COOLDOWN = 60;
+	static COST = 20;
 	
 	static drawBlueprint(x, y) {
 		window.ctx.fillStyle = "#66a3ff";
 		window.ctx.fillRect(x - Tower.SIZE.x / 2, y - Tower.SIZE.y / 2, Tower.SIZE.x, Tower.SIZE.y);
+	}
+	
+	static canPlace(x, y) {
+		let mockRect = new Rectangle(x - Tower.SIZE.x / 2, y - Tower.SIZE.y / 2, Tower.SIZE.x, Tower.SIZE.y);
+		if(mockRect.intersects(window.gameState.hq.rect)) {
+			return false;
+		}
+		
+		for(let i = 0; i < window.gameState.towers.length; i++) {
+			if(mockRect.intersects(window.gameState.towers[i].rect)){
+				return false;
+			}
+		}
+		
+		if(window.gameState.money < Tower.COST) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	constructor(x, y, asCenter) {
@@ -289,7 +380,7 @@ window.canvas.addEventListener("mousemove", (event) => {
 	window.mouseY = event.clientY - canvasRect.top;
 });
 
-window.canvas.addEventListener("click", (event) => {
+window.canvas.addEventListener("mousedown", (event) => {
 	let canvasRect = window.canvas.getBoundingClientRect();
 	let mouseX = event.clientX - canvasRect.left;
 	let mouseY = event.clientY - canvasRect.top;
@@ -301,12 +392,11 @@ window.gameState = new GameState(100);
 
 //player should place his base here
 window.gameState.init();
+window.gameState.start();
 
 loop();
 function loop() {
 	window.gameState.update();
-	window.gameState.draw();
-	
 	window.requestAnimationFrame(loop);
 }
 	
