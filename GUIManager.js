@@ -19,12 +19,12 @@ class GUIRenderer {
 		window.ctx.fillStyle = "red";
 		let drawStringHealth = "health: " + window.gameState.playerHealth;
 		let height = window.ctx.measureText(drawStringHealth).actualBoundingBoxAscent;
-		window.ctx.fillText(drawStringHealth, 0 + GUIRenderer.offset, height + GUIRenderer.offset);
+		window.ctx.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
 		
 		window.ctx.fillStyle = "gold";
 		let drawStringMoney = "money: " + window.gameState.money;
 		let measure = window.ctx.measureText(drawStringMoney);
-		window.ctx.fillText(drawStringMoney, window.canvas.width - measure.width - this.offset, measure.actualBoundingBoxAscent + this.offset);
+		window.ctx.fillText(drawStringMoney, window.canvas.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
 	}
 	
 	static drawEnd() {
@@ -39,5 +39,11 @@ class GUIRenderer {
 		let textX = window.canvas.width / 2 - textBox.width / 2;
 		let textY = window.canvas.height / 2 + textBox.actualBoundingBoxAscent / 2;
 		window.ctx.fillText(endText, textX, textY);
+	}
+}
+
+class Button {
+	constructor(x, y, width, heigth) {
+		
 	}
 }
