@@ -21,6 +21,7 @@ class GameState {
 	
 	start() {
 		this.gameStage = GameState.GAME_STAGE_RUNNING;
+		this.roundTime = 0;
 		
 		this.projectiles = [];
 		this.enemies = [];
@@ -29,10 +30,7 @@ class GameState {
 		this.playerHealth = GameState.PLAYER_START_HEALTH;
 		this.moneyCooldown = GameState.MAX_MONEY_COOLDOWN;
 		this.money = 40;
-	}
-	
-	init() {
-		//TODO query placement
+		
 		this.hq = new HQ(window.canvas.width / 2, window.canvas.height / 2, true);
 		WaveManager.init();
 	}
@@ -56,7 +54,7 @@ class GameState {
 			projectile.draw();
 		});
 		
-		GUIRenderer.draw();
+		GUIManager.draw();
 	}
 	
 	update() {
@@ -69,18 +67,6 @@ class GameState {
 	}
 	
 	runGame() {
-		WaveManager.update();
-		
-		//placing tower
-		//TODO check for collisions
-		if(this.placementAttemptPosition != undefined) {
-			if(Tower.canPlace(window.mouseX, window.mouseY)) {
-				window.gameState.money -= Tower.COST;
-				this.towers.push(new Tower(window.mouseX, window.mouseY, true));
-			}
-			this.placementAttemptPosition = undefined;
-		}
-		
 		//money
 		if(this.moneyCooldown < 1) {
 			this.money += GameState.MONEY_GAIN;
@@ -102,108 +88,83 @@ class GameState {
 			tower.update();
 		});
 		
-		//collision
-		this.enemies.forEach((enemy, index, object) => {
-			if(enemy.doesEntityCollideWith(this.hq)) {
+		//checking if enemies kill hq
+		for(let i = this.enemies.length - 1; i >= 0; i--) {
+			if(this.enemies[i].doesEntityCollideWith(this.hq)) {
 				this.playerHealth -= 10;
-				this.enemies.splice(index, 1);
-				
 				if(this.playerHealth <= 0) {
 					this.gameStage = GameState.GAME_STAGE_LOST;
 				}
+			
+				this.enemies.splice(i, 1);
 			}
-		});
+		}
 		
-		this.enemies.forEach((enemy, eIndex) => {
-			for(let i = 0; i < this.projectiles.length; i++) {
-				if(enemy.doesEntityCollideWith(this.projectiles[i])) {
-					this.enemies.splice(eIndex, 1);
-					this.projectiles.splice(i, 1);
-					window.gameState.money += 10;
+		//checking for collisions with projectiles
+		for(let e = this.enemies.length - 1; e >= 0; e--) {
+			for(let p = this.projectiles.length - 1; p >= 0; p--) {
+				if(this.enemies[e].doesEntityCollideWith(this.projectiles[p])) {
+					this.projectiles.splice(p, 1);
+					let enemyDied = this.enemies[e].takeDamage(1, e);
+					if(enemyDied) {
+						break;
+					}
 				}
 			}
-		});
-	}
-}
-
-class GUIRenderer {
-	static guiFont = "36px Orbitron";
-	static offset = 25;
-	
-	static draw() {
-		Tower.drawBlueprint(window.mouseX, window.mouseY);
+		}
 		
-		window.ctx.font = this.guiFont;
+		//placing tower
+		if(this.placementAttemptPosition != undefined) {
+			if(Tower.canPlace(window.mouseX, window.mouseY)) {
+				window.gameState.money -= Tower.COST;
+				this.towers.push(new Tower(window.mouseX, window.mouseY, true));
+			}
+			this.placementAttemptPosition = undefined;
+		}
 		
-		window.ctx.fillStyle = "red";
-		let drawStringHealth = "health: " + window.gameState.playerHealth;
-		let height = window.ctx.measureText(drawStringHealth).actualBoundingBoxAscent;
-		window.ctx.fillText(drawStringHealth, 0 + this.offset, height + this.offset);
+		WaveManager.update();
 		
-		window.ctx.fillStyle = "gold";
-		let drawStringMoney = "money: " + window.gameState.money;
-		let measure = window.ctx.measureText(drawStringMoney);
-		window.ctx.fillText(drawStringMoney, window.canvas.width - measure.width - this.offset, measure.actualBoundingBoxAscent + this.offset);
-	}
-	
-	static drawEnd() {
-		window.ctx.fillStyle = "red";
-		window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
-		
-		window.ctx.fillStyle = "black";
-		window.ctx.font = "100px Orbitron";
-		window.ctx.textBaseline = "alphabetic";
-		let endText = "Game Over";
-		let textBox = window.ctx.measureText(endText);
-		let textX = window.canvas.width / 2 - textBox.width / 2;
-		let textY = window.canvas.height / 2 + textBox.actualBoundingBoxAscent / 2;
-		window.ctx.fillText(endText, textX, textY);
+		this.roundTime += 1;
 	}
 }
 
 class WaveManager {
-	static timePassed = 0;
-	static waveCooldown = 600;
 	
-	static MAX_WAVE_TIME = 100;
-	static BASE_WAVE_AMOUNT = 5;
-	static MAX_SPREAD_RADIUS = 5;
+	static BASE_ENEMY_AMOUNT = 5;
+	static BASE_WAVE_TIME = 60;
+	static waveTime;
 	
-	static WORLD_CENTER;
-	static ON_SCREEN_LENGTH;
+	static OFFSCREEN_LENGTH;
+	static SPREAD_RADIUS = 200;
 	
 	static init() {
-		WaveManager.WORLD_CENTER = new Vector2(canvas.width / 2, canvas.height / 2);
-		WaveManager.ON_SCREEN_LENGTH = Math.sqrt(Math.pow(canvas.width / 2, 2) + Math.pow(canvas.height / 2, 2));
+		WaveManager.waveTime = WaveManager.BASE_WAVE_TIME;
+		WaveManager.OFFSCREEN_LENGTH = new Vector2(window.canvas.width / 2, window.canvas.height / 2).getLength();
 	}
 	
 	static update() {
-		if(WaveManager.waveCooldown < 1) {
-			//do wave
+		if(WaveManager.waveTime <= 0) {
+			WaveManager.waveTime = WaveManager.getCurrentWaveTime();
+			
 			WaveManager.spawnWave();
-			//TODO time passed bonus
-			WaveManager.waveCooldown = WaveManager.MAX_WAVE_TIME;
 		} else {
-			WaveManager.waveCooldown--;
+			WaveManager.waveTime -= 1;
 		}
-		
-		WaveManager.timePassed += 1;		
 	}
 	
 	static spawnWave() {
-		let radOfDirection = 2*Math.PI * Math.random();
-		let unitVector = new Vector2(Math.cos(radOfDirection), Math.sin(radOfDirection));
-		
-		let center = Vector2.scaleVec(unitVector, WaveManager.ON_SCREEN_LENGTH + WaveManager.MAX_SPREAD_RADIUS);
-		
-		for(let i = 0; i < WaveManager.BASE_WAVE_AMOUNT; i++) {
-			let radOfSub = 2*Math.PI * Math.random();
-			let uVector = new Vector2(Math.cos(radOfSub), Math.sin(radOfSub));
-			
-			let offset = Vector2.scaleVec(uVector, WaveManager.MAX_SPREAD_RADIUS);
-			
-			window.gameState.enemies.push(new Enemy(center.x + offset.x, center.y + offset.y, true));
+		let attackVector = Vector2.scaleVec(Vector2.getRandomUnitVec(), WaveManager.OFFSCREEN_LENGTH + WaveManager.SPREAD_RADIUS);
+		let attackOrigin = Vector2.add(attackVector, gameState.hq.rect.getCenter());
+		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT; i++) {
+			let spawnOffset = Vector2.scaleVec(Vector2.getRandomUnitVec(), Math.random() * WaveManager.SPREAD_RADIUS);
+			let hasArmor = Math.random() > 0.5;
+			window.gameState.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, hasArmor * 1));
 		}
+		
+	}
+	
+	static getCurrentWaveTime() {
+		return WaveManager.BASE_WAVE_TIME;
 	}
 }
 
@@ -255,8 +216,8 @@ class HQ extends Entity {
 
 class Tower extends Entity {
 	static SIZE = new Vector2(25, 25);
-	static MAX_SHOOT_COOLDOWN = 60;
-	static COST = 20;
+	static MAX_SHOOT_COOLDOWN = 30;
+	static COST = 40;
 	
 	static drawBlueprint(x, y) {
 		window.ctx.fillStyle = "#66a3ff";
@@ -306,8 +267,23 @@ class Tower extends Entity {
 	
 	tryShoot() {
 		if(window.gameState.enemies[0] != undefined) {
-			let vecToEnemy = Vector2.subtract(window.gameState.enemies[0].rect.getCenter(), this.rect.getCenter());
-			let speedToEnemy = Vector2.scaleVec(vecToEnemy.getNormalized(), 3);
+			let vecToEnemy;
+			let enemy;
+			let smallestDistance = Infinity;
+			for(let i = 0; i < window.gameState.enemies.length; i++) {
+				vecToEnemy = Vector2.subtract(window.gameState.enemies[i].rect.getCenter(), this.rect.getCenter());
+				if(vecToEnemy.getLength() < smallestDistance) {
+					enemy = window.gameState.enemies[i];
+					smallestDistance = vecToEnemy.getLength();
+				}
+			}
+			
+			if(enemy == undefined) {
+				return false;
+			}
+			
+			let vecToTarget = Vector2.subtract(enemy.rect.getCenter(), this.rect.getCenter());
+			let speedToEnemy = Vector2.scaleVec(vecToTarget.getNormalized(), 6);
 			let myCenter = this.rect.getCenter();
 			
 			window.gameState.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y));
@@ -331,27 +307,31 @@ class Projectile extends Entity {
 	}
 	
 	update(index) {
-		//top
-		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
-		this.rect.right < 0 || this.rect.left > canvas.width) {
-				window.gameState.projectiles.splice(index, 1);
-		}
-		
-		
 		this.rect.upperLeft.x += this.vel.x;
 		this.rect.upperLeft.y += this.vel.y;
+		
+		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
+			this.rect.right < 0 || this.rect.left > canvas.width) {
+			window.gameState.projectiles.splice(index, 1);
+		}
 	}
 }
 
 class Enemy extends Entity {
-	constructor(x, y, asCenter) {
+	constructor(x, y, asCenter, armor) {
 		super(x, y, asCenter, 8, 8, window.COLLIDER_SHAPE_SQUARE);
 		this.hasTarget = false;
 		this.vel = new Vector2(0, 0);
+		this.armor = armor;
 	}
 	
 	draw() {
-		window.ctx.fillStyle = "yellow";
+		if(this.armor > 0) {
+			window.ctx.fillStyle = "blue";
+		} else {
+			window.ctx.fillStyle = "yellow";
+		}
+		
 		window.ctx.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
 	}
 		
@@ -366,8 +346,14 @@ class Enemy extends Entity {
 		this.rect.upperLeft = Vector2.add(this.rect.upperLeft, this.vel);
 	}
 	
-	getCenter() {
-		return new Vector2(this.pos.x + this.size.x / 2, this.pos.y + this.size.y / 2);
+	takeDamage(damage, index) {
+		if(this.armor > 0) {
+			this.armor =- 1;
+			return false;
+		} else {
+			window.gameState.enemies.splice(index, 1);
+			return true;
+		}
 	}
 }
 
@@ -391,7 +377,6 @@ window.canvas.addEventListener("mousedown", (event) => {
 window.gameState = new GameState(100);
 
 //player should place his base here
-window.gameState.init();
 window.gameState.start();
 
 loop();

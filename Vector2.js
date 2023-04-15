@@ -33,4 +33,9 @@ class Vector2 {
 	static scaleVec(vector, scale) {
 		return new Vector2(vector.x * scale, vector.y * scale);
 	}
+	
+	static getRandomUnitVec() {
+		let vecAsRad = Math.random() * 2 * Math.PI;
+		return new Vector2(Math.cos(vecAsRad), Math.sin(vecAsRad));
+	}
 }
