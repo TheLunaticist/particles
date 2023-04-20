@@ -190,7 +190,10 @@ window.gameState = new GameState(100);
 //player should place his base here
 window.gameState.start();
 
-loop();
+window.startLoop = () => {
+	loop();
+}
+
 function loop() {
 	window.gameState.update();
 	window.requestAnimationFrame(loop);

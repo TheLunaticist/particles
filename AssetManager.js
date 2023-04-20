@@ -1,5 +1,6 @@
 class AssetManager {
 	static IMAGE_PATH = "assets\\textures\\";
+	static imagesToLoad = 0;
 	
 	static HQ_SPRITE;
 	static PROJECTILE_SPRITE;
@@ -30,6 +31,16 @@ class AssetManager {
 	static getTexture(fileName) {
 		let img = new Image();
 		img.src = AssetManager.IMAGE_PATH + fileName;
+		img.onload = AssetManager.onLoad;
+		AssetManager.imagesToLoad++;
 		return img;
 	}
+	
+	static onLoad() {
+		AssetManager.imagesToLoad--;
+		if(AssetManager.imagesToLoad == 0) {
+			window.startLoop();
+		}
+	}
+	
 }
