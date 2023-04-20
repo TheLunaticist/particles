@@ -4,12 +4,6 @@ window.ctx = window.canvas.getContext("2d");
 window.COLLIDER_SHAPE_SQUARE = 0;
 window.COLLIDER_SHAPE_CIRCLE = 1;
 
-window.hqSprite = new Image();
-window.hqSprite.src = "hq.png";
-
-window.projectileSprite = new Image();
-window.projectileSprite.src = "cannonBall.png";
-
 class GameState {
 	static GAME_STAGE_RUNNING = 0;
 	static GAME_STAGE_LOST = 1;
@@ -115,9 +109,9 @@ class GameState {
 		
 		//placing tower
 		if(this.placementAttemptPosition != undefined) {
-			if(Tower.canPlace(window.mouseX, window.mouseY)) {
+			if(Tower.canPlace(window.mouseX, window.mouseY, Tower.TOWER_TYPE_MG)) {
 				window.gameState.money -= Tower.COST;
-				this.towers.push(new Tower(window.mouseX, window.mouseY, true));
+				this.towers.push(new Tower(window.mouseX, window.mouseY, true, Tower.TOWER_TYPE_MG));
 			}
 			this.placementAttemptPosition = undefined;
 		}
@@ -168,195 +162,6 @@ class WaveManager {
 	}
 }
 
-class Entity {
-	constructor(x, y, asCenter, width, height, colliderShape) {
-		if(asCenter) {
-			this.rect = new Rectangle(x - width / 2, y - height / 2, width, height);
-		} else {
-			this.rect = new Rectangle(x, y, width, height);
-		}
-		
-		if(colliderShape == window.COLLIDER_SHAPE_CIRCLE && width != height){
-			alert("Error: Oval circle colliders are not supported for now.");
-			this.colliderShape = window.COLLIDER_SHAPE_SQUARE;
-		} else {
-			this.colliderShape = colliderShape;
-		}
-	}
-	
-	doesEntityCollideWith(other) {
-		//these are only used when there aren't 2 of the same colliders
-		let squareEnity;
-		let circleEntity;
-		
-		if(this.colliderShape == other.colliderShape) {
-			if(this.colliderShape == window.COLLIDER_SHAPE_SQUARE) {
-				return this.rect.intersects(other.rect);
-			} else {//this.colliderShape == window.COLLIDER_SHAPE_CIRCLE
-				alert("not implemented");
-			}
-			alert("not implemented");
-		}
-		alert("not implemented");
-	}
-}
-
-class HQ extends Entity {
-	static SIZE = new Vector2(40, 40);
-	
-	constructor(x, y, asCenter) {	
-		super(x, y, asCenter, HQ.SIZE.x, HQ.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
-	}
-	
-	draw() {
-		window.ctx.fillStyle = "red";
-		window.ctx.drawImage(window.hqSprite, this.rect.left, this.rect.top);
-	}
-}
-
-class Tower extends Entity {
-	static SIZE = new Vector2(25, 25);
-	static MAX_SHOOT_COOLDOWN = 30;
-	static COST = 40;
-	
-	static drawBlueprint(x, y) {
-		window.ctx.fillStyle = "#66a3ff";
-		window.ctx.fillRect(x - Tower.SIZE.x / 2, y - Tower.SIZE.y / 2, Tower.SIZE.x, Tower.SIZE.y);
-	}
-	
-	static canPlace(x, y) {
-		let mockRect = new Rectangle(x - Tower.SIZE.x / 2, y - Tower.SIZE.y / 2, Tower.SIZE.x, Tower.SIZE.y);
-		if(mockRect.intersects(window.gameState.hq.rect)) {
-			return false;
-		}
-		
-		for(let i = 0; i < window.gameState.towers.length; i++) {
-			if(mockRect.intersects(window.gameState.towers[i].rect)){
-				return false;
-			}
-		}
-		
-		if(window.gameState.money < Tower.COST) {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	constructor(x, y, asCenter) {
-		super(x, y, asCenter, Tower.SIZE.x, Tower.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
-		this.shootCooldown = Tower.MAX_SHOOT_COOLDOWN;
-	}
-	
-	draw() {
-		window.ctx.fillStyle = "#8b0000";
-		window.ctx.fillRect(this.rect.left, this.rect.top, this.rect.size.x, this.rect.size.y);
-	}
-	
-
-	
-	update() {
-		if(this.shootCooldown < 1) {
-			if(this.tryShoot()) {
-				this.shootCooldown = Tower.MAX_SHOOT_COOLDOWN;
-			}
-		} else {
-			this.shootCooldown -= 1;
-		}
-	}
-	
-	tryShoot() {
-		if(window.gameState.enemies[0] != undefined) {
-			let vecToEnemy;
-			let enemy;
-			let smallestDistance = Infinity;
-			for(let i = 0; i < window.gameState.enemies.length; i++) {
-				vecToEnemy = Vector2.subtract(window.gameState.enemies[i].rect.getCenter(), this.rect.getCenter());
-				if(vecToEnemy.getLength() < smallestDistance) {
-					enemy = window.gameState.enemies[i];
-					smallestDistance = vecToEnemy.getLength();
-				}
-			}
-			
-			if(enemy == undefined) {
-				return false;
-			}
-			
-			let vecToTarget = Vector2.subtract(enemy.rect.getCenter(), this.rect.getCenter());
-			let speedToEnemy = Vector2.scaleVec(vecToTarget.getNormalized(), 6);
-			let myCenter = this.rect.getCenter();
-			
-			window.gameState.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y));
-			return true;
-		}
-		return false;
-	}
-}
-
-class Projectile extends Entity {
-	static SIZE = new Vector2(16, 16);
-	
-	constructor(x, y, asCenter, startVelX, startVelY) {
-		super(x, y, asCenter, Projectile.SIZE.x, Projectile.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
-		this.vel = new Vector2(startVelX, startVelY);
-	}
-	
-	draw() {
-		window.ctx.fillStyle = "blue";
-		window.ctx.drawImage(window.projectileSprite, this.rect.left, this.rect.top);
-	}
-	
-	update(index) {
-		this.rect.upperLeft.x += this.vel.x;
-		this.rect.upperLeft.y += this.vel.y;
-		
-		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
-			this.rect.right < 0 || this.rect.left > canvas.width) {
-			window.gameState.projectiles.splice(index, 1);
-		}
-	}
-}
-
-class Enemy extends Entity {
-	constructor(x, y, asCenter, armor) {
-		super(x, y, asCenter, 8, 8, window.COLLIDER_SHAPE_SQUARE);
-		this.hasTarget = false;
-		this.vel = new Vector2(0, 0);
-		this.armor = armor;
-	}
-	
-	draw() {
-		if(this.armor > 0) {
-			window.ctx.fillStyle = "blue";
-		} else {
-			window.ctx.fillStyle = "yellow";
-		}
-		
-		window.ctx.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
-	}
-		
-	update() {
-		if(this.hasTarget == false) {
-			this.targetPos = window.gameState.hq.rect.getCenter();
-			this.vel = Vector2.scaleVec(Vector2.subtract(this.targetPos, this.rect.getCenter()).getNormalized(), 3);
-			
-			this.hasTarget = true;
-		}
-		
-		this.rect.upperLeft = Vector2.add(this.rect.upperLeft, this.vel);
-	}
-	
-	takeDamage(damage, index) {
-		if(this.armor > 0) {
-			this.armor =- 1;
-			return false;
-		} else {
-			window.gameState.enemies.splice(index, 1);
-			return true;
-		}
-	}
-}
-
 window.mouseX = 0;
 window.mouseY = 0;
 
@@ -370,12 +175,18 @@ window.canvas.addEventListener("mousedown", (event) => {
 	let canvasRect = window.canvas.getBoundingClientRect();
 	let mouseX = event.clientX - canvasRect.left;
 	let mouseY = event.clientY - canvasRect.top;
-	window.gameState.placementAttemptPosition = new Vector2(mouseX, mouseY);
+	
+	let doPassthrough = GUIManager.handleClick(mouseX, mouseY);
+	if(doPassthrough) {
+		window.gameState.placementAttemptPosition = new Vector2(mouseX, mouseY);
+	}
 });
 
 
-window.gameState = new GameState(100);
+GUIManager.globalInit();
+AssetManager.load();
 
+window.gameState = new GameState(100);
 //player should place his base here
 window.gameState.start();
 

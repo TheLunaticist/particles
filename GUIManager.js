@@ -1,11 +1,27 @@
 class GUIManager {
+	static BUTTON_MG;
+	static BUTTON_SNIPER;
+	
+	static MENU_OFFSET = 25;
+	static MENU_BUTTON_SIZE = 50;
+	
+	
+	static globalInit() {
+		GUIManager.BUTTON_MG = new Button(GUIManager.MENU_OFFSET, window.canvas.heigth - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, window.MG_BUTTON_SPRITE);
+		GUIManager.BUTTON_SNIPER = new Button(GUIManager.MENU_OFFSET, window.canvas.heigth - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, window.SNIPER_BUTTON_SPRITE);
+	}
+	
 	static draw() {
-		Tower.drawBlueprint(window.mouseX, window.mouseY);
+		Tower.drawBlueprint(window.mouseX, window.mouseY, Tower.TOWER_TYPE_MG);
 		GUIRenderer.drawStats();
 	}
 	
 	static update() {
 		
+	}
+	
+	static handleClick() {
+		return true;
 	}
 }
 
@@ -43,7 +59,11 @@ class GUIRenderer {
 }
 
 class Button {
-	constructor(x, y, width, heigth) {
+	constructor(x, y, width, heigth, img) {
+		this.rect = new Rectangle(x, y, width, heigth);
+	}
+	
+	draw() {
 		
 	}
 }
