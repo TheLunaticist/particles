@@ -7,13 +7,15 @@ class GUIManager {
 	
 	
 	static globalInit() {
-		GUIManager.BUTTON_MG = new Button(GUIManager.MENU_OFFSET, window.canvas.heigth - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, window.MG_BUTTON_SPRITE);
-		GUIManager.BUTTON_SNIPER = new Button(GUIManager.MENU_OFFSET, window.canvas.heigth - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, window.SNIPER_BUTTON_SPRITE);
+		GUIManager.BUTTON_MG = new Button(GUIManager.MENU_OFFSET, window.canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_BASE);
+		GUIManager.BUTTON_SNIPER = new Button(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, window.canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_BASE);
 	}
 	
 	static draw() {
 		Tower.drawBlueprint(window.mouseX, window.mouseY, Tower.TOWER_TYPE_MG);
 		GUIRenderer.drawStats();
+		GUIManager.BUTTON_MG.draw();
+		GUIManager.BUTTON_SNIPER.draw();
 	}
 	
 	static update() {
@@ -61,9 +63,11 @@ class GUIRenderer {
 class Button {
 	constructor(x, y, width, heigth, img) {
 		this.rect = new Rectangle(x, y, width, heigth);
+		console.log(img);
+		this.img = img;
 	}
 	
 	draw() {
-		
+		window.ctx.drawImage(this.img, this.rect.left, this.rect.top);
 	}
 }

@@ -23,9 +23,9 @@ class AssetManager {
 		
 		//sniper turret
 		//base
-		AssetManager.SNIPER_TURRET_BASE = AssetManager.getTexture("turret_base.png");
+		AssetManager.SNIPER_TURRET_BASE = AssetManager.getTexture("mg_turret_base.png");
 		//head
-		AssetManager.SNIPER_TURRET_HEAD = AssetManager.getTexture("turret_head.png");
+		AssetManager.SNIPER_TURRET_HEAD = AssetManager.getTexture("mg_turret_head.png");
 	}
 	
 	static getTexture(fileName) {

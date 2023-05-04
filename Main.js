@@ -182,9 +182,8 @@ window.canvas.addEventListener("mousedown", (event) => {
 	}
 });
 
-
-GUIManager.globalInit();
 AssetManager.load();
+GUIManager.globalInit();
 
 window.gameState = new GameState(100);
 //player should place his base here
