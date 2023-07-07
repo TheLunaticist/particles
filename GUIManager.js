@@ -1,3 +1,5 @@
+"use strict";
+
 class GUIManager {
 	static BUTTON_MG;
 	static BUTTON_SNIPER;
@@ -6,13 +8,13 @@ class GUIManager {
 	static MENU_BUTTON_SIZE = 50;
 	
 	
-	static globalInit() {
-		GUIManager.BUTTON_MG = new Button(GUIManager.MENU_OFFSET, window.canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_BASE);
-		GUIManager.BUTTON_SNIPER = new Button(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, window.canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_BASE);
+	static init() {
+		GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_ICON);
+		GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_ICON);
 	}
 	
 	static draw() {
-		Tower.drawBlueprint(window.mouseX, window.mouseY, Tower.TOWER_TYPE_MG);
+		Tower.drawBlueprint(InputManager.curMouseX, InputManager.curMouseY, TowerType.MG);
 		GUIRenderer.drawStats();
 		GUIManager.BUTTON_MG.draw();
 		GUIManager.BUTTON_SNIPER.draw();
@@ -22,8 +24,16 @@ class GUIManager {
 		
 	}
 	
-	static handleClick() {
-		return true;
+	static handleClick(x, y) {
+		if(GUIManager.BUTTON_MG.rect.isInside(new Vector2(x, y))) {
+			return false;
+		}
+		else if(GUIManager.BUTTON_SNIPER.rect.isInside(new Vector2(x, y))) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 }
 
@@ -32,42 +42,41 @@ class GUIRenderer {
 	static STAT_OFFSET = 25;
 	
 	static drawStats() {
-		window.ctx.font = GUIRenderer.STAT_FONT;
+		Game.CTX.font = GUIRenderer.STAT_FONT;
 		
-		window.ctx.fillStyle = "red";
-		let drawStringHealth = "health: " + window.gameState.playerHealth;
-		let height = window.ctx.measureText(drawStringHealth).actualBoundingBoxAscent;
-		window.ctx.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
+		Game.CTX.fillStyle = "red";
+		let drawStringHealth = "health: " + Game.state.playerHealth;
+		let height = Game.CTX.measureText(drawStringHealth).actualBoundingBoxAscent;
+		Game.CTX.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
 		
-		window.ctx.fillStyle = "gold";
-		let drawStringMoney = "money: " + window.gameState.money;
-		let measure = window.ctx.measureText(drawStringMoney);
-		window.ctx.fillText(drawStringMoney, window.canvas.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
+		Game.CTX.fillStyle = "gold";
+		let drawStringMoney = "money: " + Game.state.money;
+		let measure = Game.CTX.measureText(drawStringMoney);
+		Game.CTX.fillText(drawStringMoney, Game.CANV.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
 	}
 	
 	static drawEnd() {
-		window.ctx.fillStyle = "red";
-		window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
+		Game.CTX.fillStyle = "red";
+		Game.CTX.fillRect(0, 0, Game.CANV.width, Game.CANV.width);
 		
-		window.ctx.fillStyle = "black";
-		window.ctx.font = "100px Orbitron";
-		window.ctx.textBaseline = "alphabetic";
+		Game.CTX.fillStyle = "black";
+		Game.CTX.font = "100px Orbitron";
+		Game.CTX.textBaseline = "alphabetic";
 		let endText = "Game Over";
-		let textBox = window.ctx.measureText(endText);
-		let textX = window.canvas.width / 2 - textBox.width / 2;
-		let textY = window.canvas.height / 2 + textBox.actualBoundingBoxAscent / 2;
-		window.ctx.fillText(endText, textX, textY);
+		let textBox = Game.CTX.measureText(endText);
+		let textX = Game.CANV.width / 2 - textBox.width / 2;
+		let textY = Game.CANV.height / 2 + textBox.actualBoundingBoxAscent / 2;
+		Game.CTX.fillText(endText, textX, textY);
 	}
 }
 
-class Button {
+class Clickable {
 	constructor(x, y, width, heigth, img) {
 		this.rect = new Rectangle(x, y, width, heigth);
-		console.log(img);
 		this.img = img;
 	}
 	
 	draw() {
-		window.ctx.drawImage(this.img, this.rect.left, this.rect.top);
+		Game.CTX.drawImage(this.img, this.rect.left, this.rect.top);
 	}
 }

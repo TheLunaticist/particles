@@ -1,3 +1,5 @@
+"use strict";
+
 class Rectangle {
 	constructor(x, y, width, height) {
 		this.upperLeft = new Vector2(x, y);
@@ -9,15 +11,19 @@ class Rectangle {
 	}
 	
 	intersects(otherRect) {
-		return (
-				((this.left > otherRect.left && this.left < otherRect.right)
-				||
-				(this.right > otherRect.left && this.right < otherRect.right)) 
-			&&
-				((this.top > otherRect.top && this.top < otherRect.bottom)
-				||
-				(this.bottom > otherRect.top && this.bottom < otherRect.bottom))
-			);
+		if(this.left > otherRect.right || this.right < otherRect.left) {
+			return false;
+		}
+		
+		if(this.top > otherRect.bottom || this.bottom < otherRect.top) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	isInside(pos) {
+		return pos.x > this.left && pos.x < this.right && pos.y > this.top && pos.y < this.bottom;
 	}
 	
 	get left() {

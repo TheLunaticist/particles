@@ -1,3 +1,5 @@
+"use strict";
+
 class Entity {
 	constructor(x, y, asCenter, width, height, colliderShape) {
 		if(asCenter) {
@@ -6,28 +8,20 @@ class Entity {
 			this.rect = new Rectangle(x, y, width, height);
 		}
 		
-		if(colliderShape == window.COLLIDER_SHAPE_CIRCLE && width != height){
+		if(colliderShape == ColliderShapes.CIRCLE && width != height){
 			alert("Error: Oval circle colliders are not supported for now.");
-			this.colliderShape = window.COLLIDER_SHAPE_SQUARE;
+			this.colliderShape = ColliderShapes.SQUARE;
 		} else {
 			this.colliderShape = colliderShape;
 		}
 	}
 	
 	doesEntityCollideWith(other) {
-		//these are only used when there aren't 2 of the same colliders
-		let squareEnity;
-		let circleEntity;
-		
-		if(this.colliderShape == other.colliderShape) {
-			if(this.colliderShape == window.COLLIDER_SHAPE_SQUARE) {
-				return this.rect.intersects(other.rect);
-			} else {//this.colliderShape == window.COLLIDER_SHAPE_CIRCLE
-				alert("not implemented");
-			}
-			alert("not implemented");
+		if(this.colliderShape == ColliderShapes.SQUARE && other.colliderShape == ColliderShapes.SQUARE) {
+			return this.rect.intersects(other.rect);
+		} else {
+			throw "Other colliders are not implemented yet.";
 		}
-		alert("not implemented");
 	}
 }
 
@@ -35,91 +29,78 @@ class HQ extends Entity {
 	static SIZE = new Vector2(40, 40);
 	
 	constructor(x, y, asCenter) {	
-		super(x, y, asCenter, HQ.SIZE.x, HQ.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
+		super(x, y, asCenter, HQ.SIZE.x, HQ.SIZE.y, ColliderShapes.SQUARE);
 	}
 	
 	draw() {
-		window.ctx.fillStyle = "red";
-		window.ctx.drawImage(AssetManager.HQ_SPRITE, this.rect.left, this.rect.top);
+		Game.CTX.drawImage(AssetManager.HQ_SPRITE, this.rect.left, this.rect.top);
+	}
+}
+
+class TowerType {
+	static MG = new TowerType(new Vector2(32, 32), 4);
+	static SNIPER = new TowerType(new Vector2(32, 32), 1);
+
+	constructor(size, damage) {
+		this.size = size;
+		this.damage = damage;
 	}
 }
 
 class Tower extends Entity {
-	static TOWER_TYPE_MG = 0;
-	static TOWER_TYPE_SNIPER = 1;
-	
-	static SIZE_MG = new Vector2(32, 32);
-	static SIZE_SNIPER = new Vector2(32, 32);
-	
 	static MAX_SHOOT_COOLDOWN = 30;
 	static COST = 40;
 	
-	static drawBlueprint(x, y, towerType) {
-		if(towerType == Tower.TOWER_TYPE_MG) {
-			window.ctx.fillStyle = "#add8e6";
-			window.ctx.fillRect(x - Tower.SIZE_MG.x / 2, y - Tower.SIZE_MG.y / 2, Tower.SIZE_MG.x, Tower.SIZE_MG.y);
-		} else if(towerType == Tower.TOWER_TYPE_SNIPER) {
-			window.ctx.fillStyle = "#99cfe0";
-			window.ctx.fillRect(x - Tower.SIZE_SNIPER.x / 2, y - Tower.SIZE_SNIPER.y / 2, Tower.SIZE_SNIPER.x, Tower.SIZE_SNIPER.y);
+	static drawBlueprint(x, y, type) {
+		if(Game.state.money >= 40 && Tower.canPlace(x, y, type)) {
+			Game.CTX.fillStyle = Colors.BP;
 		} else {
-			//Unknown tower type
-			debugger;
+			Game.CTX.fillStyle = Colors.BP_INVALID;
 		}
+		
+		Game.CTX.fillRect(x - type.size.x / 2, y - type.size.y / 2, type.size.x, type.size.y);
 	}
 	
-	static canPlace(x, y, towerType) {
-		let mockRect;
+	static canPlace(xCenter, yCenter, tType) {
+		let mockRect = new Rectangle(xCenter - tType.size.x / 2, yCenter - tType.size.y / 2, tType.size.x, tType.size.y);
 		
-		if(towerType == Tower.TOWER_TYPE_MG) {
-			mockRect = new Rectangle(x - Tower.SIZE_MG.x / 2, y - Tower.SIZE_MG.y / 2, Tower.SIZE_MG.x, Tower.SIZE_MG.y);
-		} else if(towerType == Tower.TOWER_TYPE_SNIPER) {
-			mockRect = new Rectangle(x - Tower.SIZE_SNIPER.x / 2, y - Tower.SIZE_SNIPER.y / 2, Tower.SIZE_SNIPER.x, Tower.SIZE_SNIPER.y);
-		} else {
-			//Unknown tower type
-			debugger;
-		}
-		
-		
-		if(mockRect.intersects(window.gameState.hq.rect)) {
+		//HQ
+		if(mockRect.intersects(Game.state.hq.rect)) {
 			return false;
 		}
 		
-		for(let i = 0; i < window.gameState.towers.length; i++) {
-			if(mockRect.intersects(window.gameState.towers[i].rect)){
+		//Towers
+		for(let i = 0; i < Game.state.towers.length; i++) {
+			let tRect = Game.state.towers[i].rect;
+			
+			if(mockRect.intersects(tRect)) {
 				return false;
 			}
 		}
 		
-		if(window.gameState.money < Tower.COST) {
+		if(Game.state.money < Tower.COST) {
 			return false;
 		}
 		
 		return true;
 	}
 	
-	constructor(x, y, asCenter, towerType) {
-		if(towerType == Tower.TOWER_TYPE_MG) {
-			super(x, y, asCenter, Tower.SIZE_MG.x, Tower.SIZE_MG.y, window.COLLIDER_SHAPE_SQUARE);
-		} else if(towerType == Tower.TOWER_TYPE_SNIPER) {
-			super(x, y, asCenter, Tower.SIZE_SNIPER.x, Tower.SIZE_SNIPER.y, window.COLLIDER_SHAPE_SQUARE);
-		} else {
-			//Unknown tower type
-			debugger;
-		}
+	constructor(x, y, asCenter, type) {
+		super(x, y, asCenter, type.size.x, type.size.y, ColliderShapes.SQUARE);
 		
 		this.shootCooldown = Tower.MAX_SHOOT_COOLDOWN;
-		this.type = towerType;
+		this.type = type;
 		this.target = undefined;
 	}
 	
 	draw() {
-		if(this.type == Tower.TOWER_TYPE_MG) {
+		if(this.type == TowerType.MG) {
 			let HEAD_SIZE = 32;
 			//drawing base
-			window.ctx.drawImage(AssetManager.MG_TURRET_BASE, this.rect.left, this.rect.top);
+			Game.CTX.drawImage(AssetManager.MG_TURRET_BASE, this.rect.left, this.rect.top);
 			
 			//drawing head
-			window.ctx.save();
+			Game.CTX.save();
 			
 			let angle;
 			if(this.target != undefined) {
@@ -131,14 +112,14 @@ class Tower extends Entity {
 			
 			
 			let center = this.rect.getCenter();
-			window.ctx.translate(center.x, center.y);
-			window.ctx.rotate(angle);
-			window.ctx.drawImage(AssetManager.MG_TURRET_HEAD, -HEAD_SIZE / 2, -HEAD_SIZE / 2);
+			Game.CTX.translate(center.x, center.y);
+			Game.CTX.rotate(angle);
+			Game.CTX.drawImage(AssetManager.MG_TURRET_HEAD, -HEAD_SIZE / 2, -HEAD_SIZE / 2);
 			
-			window.ctx.restore();
+			Game.CTX.restore();
 			
-		} else if(this.type == Tower.TOWER_TYPE_SNIPER) {
-			window.ctx.drawImage(AssetManager.SNIPER_TURRET_BASE, this.rect.left, this.rect.top);
+		} else if(this.type == TowerType.SNIPER) {
+			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_BASE, this.rect.left, this.rect.top);
 		} else {
 			//Unknown tower type
 			debugger;
@@ -164,7 +145,7 @@ class Tower extends Entity {
 			let vecToTarget = Vector2.subtract(this.target.rect.getCenter(), this.rect.getCenter());
 			let speedToEnemy = Vector2.scaleVec(vecToTarget.getNormalized(), 6);
 			let myCenter = this.rect.getCenter();	
-			window.gameState.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y));
+			Game.state.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y, this.type.damage));
 			return true;
 		} else {
 			return false;
@@ -172,14 +153,14 @@ class Tower extends Entity {
 	}
 	
 	acquireTarget() {
-		if(window.gameState.enemies[0] != undefined) {
+		if(Game.state.enemies[0] != undefined) {
 			let vecToEnemy;
 			let enemy;
 			let smallestDistance = Infinity;
-			for(let i = 0; i < window.gameState.enemies.length; i++) {
-				vecToEnemy = Vector2.subtract(window.gameState.enemies[i].rect.getCenter(), this.rect.getCenter());
+			for(let i = 0; i < Game.state.enemies.length; i++) {
+				vecToEnemy = Vector2.subtract(Game.state.enemies[i].rect.getCenter(), this.rect.getCenter());
 				if(vecToEnemy.getLength() < smallestDistance) {
-					enemy = window.gameState.enemies[i];
+					enemy = Game.state.enemies[i];
 					smallestDistance = vecToEnemy.getLength();
 				}
 			}
@@ -198,49 +179,52 @@ class Tower extends Entity {
 class Projectile extends Entity {
 	static SIZE = new Vector2(16, 16);
 	
-	constructor(x, y, asCenter, startVelX, startVelY) {
-		super(x, y, asCenter, Projectile.SIZE.x, Projectile.SIZE.y, window.COLLIDER_SHAPE_SQUARE);
+	constructor(x, y, asCenter, startVelX, startVelY, damage) {
+		super(x, y, asCenter, Projectile.SIZE.x, Projectile.SIZE.y, ColliderShapes.SQUARE);
 		this.vel = new Vector2(startVelX, startVelY);
+		this.damage = damage;
 	}
 	
 	draw() {
-		window.ctx.fillStyle = "blue";
-		window.ctx.drawImage(AssetManager.PROJECTILE_SPRITE, this.rect.left, this.rect.top);
+		Game.CTX.fillStyle = "blue";
+		Game.CTX.drawImage(AssetManager.PROJECTILE_SPRITE, this.rect.left, this.rect.top);
 	}
 	
 	update(index) {
 		this.rect.upperLeft.x += this.vel.x;
 		this.rect.upperLeft.y += this.vel.y;
 		
-		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
-			this.rect.right < 0 || this.rect.left > canvas.width) {
-			window.gameState.projectiles.splice(index, 1);
+		if(this.rect.bottom < 0 || this.rect.top > Game.CANV.height ||
+			this.rect.right < 0 || this.rect.left > Game.CANV.width) {
+			Game.state.projectiles.splice(index, 1);
 		}
 	}
 }
 
 class Enemy extends Entity {
-	constructor(x, y, asCenter, armor) {
-		super(x, y, asCenter, 8, 8, window.COLLIDER_SHAPE_SQUARE);
+	constructor(x, y, asCenter, startArmor) {
+		super(x, y, asCenter, 8, 8, ColliderShapes.SQUARE);
 		this.hasTarget = false;
 		this.vel = new Vector2(0, 0);
-		this.armor = armor;
+		this.armor = startArmor;
 		this.isDead = false;
 	}
 	
 	draw() {
-		if(this.armor > 0) {
-			window.ctx.fillStyle = "blue";
+		if(this.armor >= 8) {
+			Game.CTX.fillStyle = "green";
+		} else if(this.armor >= 4) {
+			Game.CTX.fillStyle = "yellow";
 		} else {
-			window.ctx.fillStyle = "yellow";
+			Game.CTX.fillStyle = "red";
 		}
 		
-		window.ctx.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
+		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
 	}
 		
 	update() {
 		if(this.hasTarget == false) {
-			this.targetPos = window.gameState.hq.rect.getCenter();
+			this.targetPos = Game.state.hq.rect.getCenter();
 			this.vel = Vector2.scaleVec(Vector2.subtract(this.targetPos, this.rect.getCenter()).getNormalized(), 3);
 			
 			this.hasTarget = true;
@@ -249,15 +233,16 @@ class Enemy extends Entity {
 		this.rect.upperLeft = Vector2.add(this.rect.upperLeft, this.vel);
 	}
 	
-	takeDamage(damage, index) {
-		if(this.armor > 0) {
-			this.armor =- 1;
-			return false;
+	takeDamage(damage, index) {	
+		if(this.armor > 0) {	
+			console.log(this.armor);
+			this.armor = this.armor - damage;
+			console.log(this.armor);
 		} else {
-			window.gameState.enemies.splice(index, 1);
+			Game.state.enemies.splice(index, 1);
 			this.isDead = true;
 
-			window.gameState.money += 5;
+			Game.state.money += 5;
 			return true;
 		}
 	}
