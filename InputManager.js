@@ -1,6 +1,8 @@
+"use strict";
+
 class InputManager {
-	static curMouseX;
-	static curMouseY;
+	static curMouseX = 0;
+	static curMouseY = 0;
 	
 	
 	static init() {

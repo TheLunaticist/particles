@@ -5,7 +5,7 @@ class GUIManager {
 	static BUTTON_SNIPER;
 	
 	static MENU_OFFSET = 25;
-	static MENU_BUTTON_SIZE = 50;
+	static MENU_BUTTON_SIZE = 56;
 	
 	
 	static init() {
@@ -77,6 +77,13 @@ class Clickable {
 	}
 	
 	draw() {
-		Game.CTX.drawImage(this.img, this.rect.left, this.rect.top);
+		if(this.rect.isInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY))) {
+			Game.CTX.fillStyle = "White";
+		} else {
+			Game.CTX.fillStyle = "DarkRed";
+		}
+		
+		Game.CTX.fillRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+		Game.CTX.drawImage(this.img, this.rect.left + 3, this.rect.top + 3);
 	}
 }

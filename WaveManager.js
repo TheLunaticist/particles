@@ -1,3 +1,4 @@
+"use strict";
 
 class WaveManager {
 	static BASE_ENEMY_AMOUNT = 5;

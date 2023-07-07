@@ -1,3 +1,5 @@
+"use strict";
+
 class GameStages {
 	static RUNNING = 0;
 	static OVER = 1;
