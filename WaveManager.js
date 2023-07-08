@@ -31,7 +31,7 @@ class WaveManager {
 		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT + WaveManager.waveCount / 4; i++) {
 			let spawnOffset = Vector2.scaleVec(Vector2.getRandomUnitVec(), Math.random() * WaveManager.SPREAD_RADIUS);
 			let hasArmor = Math.random() > 0.5;
-			Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, hasArmor * 8));
+			Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, Math.random() > 0.5 ? EnemyType.SMALL : EnemyType.BIG, hasArmor * 8));
 		}
 		
 	}

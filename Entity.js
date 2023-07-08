@@ -223,13 +223,23 @@ class Projectile extends Entity {
 	}
 }
 
+class EnemyType {
+	static SMALL = new EnemyType(new Vector2(8, 8));
+	static BIG = new EnemyType(new Vector2(16, 16));
+	
+	constructor(size) {
+		this.size = size;
+	}
+}
+
 class Enemy extends Entity {
-	constructor(x, y, asCenter, startArmor) {
-		super(x, y, asCenter, 8, 8, ColliderShapes.SQUARE);
+	constructor(x, y, asCenter, type, startArmor) {
+		super(x, y, asCenter, type.size.x, type.size.y, ColliderShapes.SQUARE);
 		this.hasTarget = false;
 		this.vel = new Vector2(0, 0);
 		this.armor = startArmor;
 		this.isDead = false;
+		this.type = type;
 	}
 	
 	draw() {
@@ -241,7 +251,7 @@ class Enemy extends Entity {
 			Game.CTX.fillStyle = "red";
 		}
 		
-		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.rect.size.x, this.rect.size.y);
+		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.type.size.x, this.type.size.y);
 	}
 		
 	update() {
