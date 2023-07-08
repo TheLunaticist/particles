@@ -4,6 +4,7 @@ class WaveManager {
 	static BASE_ENEMY_AMOUNT = 5;
 	static BASE_WAVE_TIME = 60;
 	static waveTime;
+	static waveCount = 0;
 	
 	static OFFSCREEN_LENGTH;
 	static SPREAD_RADIUS = 200;
@@ -24,9 +25,10 @@ class WaveManager {
 	}
 	
 	static spawnWave() {
+		WaveManager.waveCount += 1;
 		let attackVector = Vector2.scaleVec(Vector2.getRandomUnitVec(), WaveManager.OFFSCREEN_LENGTH + WaveManager.SPREAD_RADIUS);
 		let attackOrigin = Vector2.add(attackVector, Game.state.hq.rect.getCenter());
-		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT; i++) {
+		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT + WaveManager.waveCount / 4; i++) {
 			let spawnOffset = Vector2.scaleVec(Vector2.getRandomUnitVec(), Math.random() * WaveManager.SPREAD_RADIUS);
 			let hasArmor = Math.random() > 0.5;
 			Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, hasArmor * 8));

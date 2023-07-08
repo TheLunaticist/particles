@@ -10,6 +10,8 @@ class Game {
 	static stage = GameStages.RUNNING;
 	static state;
 	
+	static throttleFps = false;
+	
 	static init(canvas) {
 		Game.CANV = canvas;
 		Game.CTX = Game.CANV.getContext("2d");
@@ -30,6 +32,10 @@ class Game {
 		}
 		
 	}
+	
+	static toggleThrottle() {
+		Game.throttleFps = !Game.throttleFps;
+	}
 }
 
 class State {
@@ -43,6 +49,8 @@ class State {
 		this.playerHealth = StartConfig.PLAYER_HEALTH;
 		this.moneyCooldown = MoneyConfig.COOLDOWN;
 		this.money = StartConfig.PLAYER_MONEY;
+		
+		this.selTowType = TowerType.SNIPER;
 	}
 	
 	draw() {
@@ -106,7 +114,6 @@ class State {
 			for(let p = this.projectiles.length - 1; p >= 0; p--) {
 				if(this.enemies[e].doesEntityCollideWith(this.projectiles[p])) {
 					let damage = this.projectiles[p].damage;
-					console.log(damage);
 					this.projectiles.splice(p, 1);
 					let enemyDied = this.enemies[e].takeDamage(damage, e);
 					if(enemyDied) {
@@ -118,9 +125,9 @@ class State {
 		
 		//placing tower
 		if(this.placementAttemptPosition != undefined) {
-			if(Tower.canPlace(this.placementAttemptPosition.x, this.placementAttemptPosition.y, TowerType.MG)) {
-				Game.state.money -= Tower.COST;
-				this.towers.push(new Tower(this.placementAttemptPosition.x, this.placementAttemptPosition.y, true, TowerType.MG));
+			if(Tower.canPlace(this.placementAttemptPosition.x, this.placementAttemptPosition.y, this.selTowType)) {
+				Game.state.money -= this.selTowType.cost;
+				this.towers.push(new Tower(this.placementAttemptPosition.x, this.placementAttemptPosition.y, true, this.selTowType));
 			}
 			this.placementAttemptPosition = undefined;
 		}

@@ -38,19 +38,18 @@ class HQ extends Entity {
 }
 
 class TowerType {
-	static MG = new TowerType(new Vector2(32, 32), 4);
-	static SNIPER = new TowerType(new Vector2(32, 32), 1);
+	static MG = new TowerType(new Vector2(48, 48), 1, 60, 6);
+	static SNIPER = new TowerType(new Vector2(32, 32), 8, 40, 30);
 
-	constructor(size, damage) {
+	constructor(size, damage, cost, maxShootCooldown) {
 		this.size = size;
 		this.damage = damage;
+		this.cost = cost;
+		this.maxShootCooldown = maxShootCooldown;
 	}
 }
 
 class Tower extends Entity {
-	static MAX_SHOOT_COOLDOWN = 30;
-	static COST = 40;
-	
 	static drawBlueprint(x, y, type) {
 		if(Game.state.money >= 40 && Tower.canPlace(x, y, type)) {
 			Game.CTX.fillStyle = Colors.BP;
@@ -78,7 +77,7 @@ class Tower extends Entity {
 			}
 		}
 		
-		if(Game.state.money < Tower.COST) {
+		if(Game.state.money < tType.cost) {
 			return false;
 		}
 		
@@ -88,16 +87,16 @@ class Tower extends Entity {
 	constructor(x, y, asCenter, type) {
 		super(x, y, asCenter, type.size.x, type.size.y, ColliderShapes.SQUARE);
 		
-		this.shootCooldown = Tower.MAX_SHOOT_COOLDOWN;
+		this.shootCooldown = type.maxShootCooldown;
 		this.type = type;
 		this.target = undefined;
 	}
 	
 	draw() {
-		if(this.type == TowerType.MG) {
+		if(this.type == TowerType.SNIPER) {
 			let HEAD_SIZE = 32;
 			//drawing base
-			Game.CTX.drawImage(AssetManager.MG_TURRET_BASE, this.rect.left, this.rect.top);
+			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_BASE, this.rect.left, this.rect.top);
 			
 			//drawing head
 			Game.CTX.save();
@@ -114,12 +113,30 @@ class Tower extends Entity {
 			let center = this.rect.getCenter();
 			Game.CTX.translate(center.x, center.y);
 			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.MG_TURRET_HEAD, -HEAD_SIZE / 2, -HEAD_SIZE / 2);
+			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_HEAD, -HEAD_SIZE / 2, -HEAD_SIZE / 2);
 			
 			Game.CTX.restore();
 			
-		} else if(this.type == TowerType.SNIPER) {
-			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_BASE, this.rect.left, this.rect.top);
+		} else if(this.type == TowerType.MG) {
+			Game.CTX.drawImage(AssetManager.MG_TURRET_BASE, this.rect.left, this.rect.top);
+			
+			Game.CTX.save();
+			
+			let angle;
+			if(this.target != undefined) {
+				let targetVector = Vector2.subtract(this.target.rect.getCenter(), this.rect.getCenter());
+				angle = Math.atan2(targetVector.y, targetVector.x) + 2*Math.PI * (3/4);
+			} else {
+				angle = 0;
+			}
+			
+			
+			let center = this.rect.getCenter();
+			Game.CTX.translate(center.x, center.y);
+			Game.CTX.rotate(angle);
+			Game.CTX.drawImage(AssetManager.MG_TURRET_HEAD, -48 / 2, -48 / 2);
+			
+			Game.CTX.restore();
 		} else {
 			//Unknown tower type
 			debugger;
@@ -133,7 +150,7 @@ class Tower extends Entity {
 		
 		if(this.shootCooldown < 1) {
 			if(this.tryShoot()) {
-				this.shootCooldown = Tower.MAX_SHOOT_COOLDOWN;
+				this.shootCooldown = this.type.maxShootCooldown;
 			}
 		} else {
 			this.shootCooldown -= 1;
@@ -144,6 +161,11 @@ class Tower extends Entity {
 		if(this.target != undefined) {
 			let vecToTarget = Vector2.subtract(this.target.rect.getCenter(), this.rect.getCenter());
 			let speedToEnemy = Vector2.scaleVec(vecToTarget.getNormalized(), 6);
+			if(this.type == TowerType.MG) {
+				speedToEnemy.x += (Math.random() - 0.5) * 4;
+				speedToEnemy.y += (Math.random() - 0.5) * 4;
+			}
+			
 			let myCenter = this.rect.getCenter();	
 			Game.state.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y, this.type.damage));
 			return true;
@@ -235,9 +257,7 @@ class Enemy extends Entity {
 	
 	takeDamage(damage, index) {	
 		if(this.armor > 0) {	
-			console.log(this.armor);
 			this.armor = this.armor - damage;
-			console.log(this.armor);
 		} else {
 			Game.state.enemies.splice(index, 1);
 			this.isDead = true;

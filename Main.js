@@ -2,13 +2,19 @@
 
 class Looper {
 	static lastFrameTS;
+	static THROTTLE_FPS = false;
+	static skippedLast = false;
 	
 	static loop() {
-		while(Date.now() - Looper.lastFrameTS < Game.MS_PER_FRAME) {}
+		//while(Date.now() - Looper.lastFrameTS < Game.MS_PER_FRAME) {}
 		
-		Game.doFrame();
+		if(!Game.throttleFps || Looper.skippedLast) {
+			Game.doFrame();
+		}
 		
-		Looper.lastFrameTS = Date.now();
+		Looper.skippedLast = !Looper.skippedLast;
+		
+		//Looper.lastFrameTS = Date.now();
 		window.requestAnimationFrame(Looper.loop);
 	}
 }

@@ -9,15 +9,15 @@ class GUIManager {
 	
 	
 	static init() {
-		GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_ICON);
-		GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_ICON);
+		GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_ICON, TowerType.SNIPER);
+		GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_ICON, TowerType.MG);
 	}
 	
 	static draw() {
-		Tower.drawBlueprint(InputManager.curMouseX, InputManager.curMouseY, TowerType.MG);
+		Tower.drawBlueprint(InputManager.curMouseX, InputManager.curMouseY, Game.state.selTowType);
 		GUIRenderer.drawStats();
-		GUIManager.BUTTON_MG.draw();
 		GUIManager.BUTTON_SNIPER.draw();
+		GUIManager.BUTTON_MG.draw();
 	}
 	
 	static update() {
@@ -25,10 +25,12 @@ class GUIManager {
 	}
 	
 	static handleClick(x, y) {
-		if(GUIManager.BUTTON_MG.rect.isInside(new Vector2(x, y))) {
+		if(GUIManager.BUTTON_SNIPER.rect.isInside(new Vector2(x, y))) {
+			GUIManager.BUTTON_SNIPER.handleClick();
 			return false;
 		}
-		else if(GUIManager.BUTTON_SNIPER.rect.isInside(new Vector2(x, y))) {
+		else if(GUIManager.BUTTON_MG.rect.isInside(new Vector2(x, y))) {
+			GUIManager.BUTTON_MG.handleClick();
 			return false;
 		}
 		else {
@@ -71,13 +73,18 @@ class GUIRenderer {
 }
 
 class Clickable {
-	constructor(x, y, width, heigth, img) {
+	constructor(x, y, width, heigth, img, towerType) {
 		this.rect = new Rectangle(x, y, width, heigth);
 		this.img = img;
+		this.towerType = towerType;
+	} 
+	
+	handleClick() {
+		Game.state.selTowType = this.towerType;
 	}
 	
 	draw() {
-		if(this.rect.isInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY))) {
+		if(this.rect.isInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY)) || this.towerType == Game.state.selTowType) {
 			Game.CTX.fillStyle = "White";
 		} else {
 			Game.CTX.fillStyle = "DarkRed";

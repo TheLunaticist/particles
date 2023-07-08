@@ -8,8 +8,13 @@ class AssetManager {
 	static HQ_SPRITE;
 	static PROJECTILE_SPRITE;
 	
-	static MG_TURRET_BASE;
+	static SNIPER_TURRET_HEAD;
 	static SNIPER_TURRET_BASE;
+	static SNIPER_TURRET_ICON;
+	
+	static MG_TURRET_BASE;
+	static MG_TURRET_HEAD;
+	static MG_TURRET_ICON;
 	
 	static loadThenCall(func) {
 		AssetManager.funcToCall = func;
@@ -30,9 +35,9 @@ class AssetManager {
 		
 		//sniper turret
 		//base
-		AssetManager.SNIPER_TURRET_BASE = AssetManager.getTexture("mg_turret_base.png");
+		AssetManager.SNIPER_TURRET_BASE = AssetManager.getTexture("sniper_turret_base.png");
 		//head
-		AssetManager.SNIPER_TURRET_HEAD = AssetManager.getTexture("mg_turret_head.png");
+		AssetManager.SNIPER_TURRET_HEAD = AssetManager.getTexture("sniper_turret_head.png");
 		AssetManager.SNIPER_TURRET_ICON = AssetManager.getTexture("sniper_button.png");
 		
 	}
