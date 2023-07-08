@@ -7,7 +7,7 @@ class WaveManager {
 	static waveCount = 0;
 	
 	static OFFSCREEN_LENGTH;
-	static SPREAD_RADIUS = 200;
+	static SPREAD_RADIUS = 300;
 	
 	static init() {
 		WaveManager.waveTime = WaveManager.BASE_WAVE_TIME;
@@ -28,10 +28,17 @@ class WaveManager {
 		WaveManager.waveCount += 1;
 		let attackVector = Vector2.scaleVec(Vector2.getRandomUnitVec(), WaveManager.OFFSCREEN_LENGTH + WaveManager.SPREAD_RADIUS);
 		let attackOrigin = Vector2.add(attackVector, Game.state.hq.rect.getCenter());
-		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT + WaveManager.waveCount / 4; i++) {
+		for(let i = 0; i < WaveManager.BASE_ENEMY_AMOUNT + WaveManager.waveCount / 8; i++) {
 			let spawnOffset = Vector2.scaleVec(Vector2.getRandomUnitVec(), Math.random() * WaveManager.SPREAD_RADIUS);
 			let hasArmor = Math.random() > 0.5;
-			Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, Math.random() > 0.5 ? EnemyType.SMALL : EnemyType.BIG, hasArmor * 8));
+			Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, Math.random() > 0.5 ? EnemyType.SMALL : EnemyType.BIG, hasArmor ? 0 : 8 + WaveManager.waveCount / 20));
+		}
+		if(WaveManager.waveCount % 10 == 0) {
+			
+			for(let i = 0; i < WaveManager.waveCount / 15; i++) {
+				let spawnOffset = Vector2.scaleVec(Vector2.getRandomUnitVec(), Math.random() * WaveManager.SPREAD_RADIUS);
+				Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, EnemyType.BOSS, 70 + WaveManager.waveCount));
+			}
 		}
 		
 	}

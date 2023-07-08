@@ -38,7 +38,7 @@ class HQ extends Entity {
 }
 
 class TowerType {
-	static MG = new TowerType(new Vector2(48, 48), 1, 60, 6);
+	static MG = new TowerType(new Vector2(48, 48), 2, 60, 6);
 	static SNIPER = new TowerType(new Vector2(32, 32), 8, 40, 30);
 
 	constructor(size, damage, cost, maxShootCooldown) {
@@ -224,11 +224,13 @@ class Projectile extends Entity {
 }
 
 class EnemyType {
-	static SMALL = new EnemyType(new Vector2(8, 8));
-	static BIG = new EnemyType(new Vector2(16, 16));
+	static SMALL = new EnemyType(new Vector2(8, 8), 1);
+	static BIG = new EnemyType(new Vector2(16, 16), 2);
+	static BOSS = new EnemyType(new Vector2(48, 48), 10);
 	
-	constructor(size) {
+	constructor(size, reward) {
 		this.size = size;
+		this.reward = reward;
 	}
 }
 
@@ -272,7 +274,7 @@ class Enemy extends Entity {
 			Game.state.enemies.splice(index, 1);
 			this.isDead = true;
 
-			Game.state.money += 5;
+			Game.state.money += this.type.reward;
 			return true;
 		}
 	}

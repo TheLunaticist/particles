@@ -12,7 +12,7 @@ class MoneyConfig {
 
 class StartConfig {
 	static PLAYER_HEALTH = 200;
-	static PLAYER_MONEY = 40;
+	static PLAYER_MONEY = 160;
 }
 
 class Colors {
