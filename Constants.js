@@ -6,8 +6,8 @@ class GameStages {
 }
 
 class MoneyConfig {
-	static COOLDOWN = 300;
-	static GAIN = 50;
+	static COOLDOWN = 1;
+	static GAIN = 0.2;
 }
 
 class StartConfig {

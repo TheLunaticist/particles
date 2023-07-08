@@ -47,12 +47,12 @@ class GUIRenderer {
 		Game.CTX.font = GUIRenderer.STAT_FONT;
 		
 		Game.CTX.fillStyle = "red";
-		let drawStringHealth = "health: " + Game.state.playerHealth;
+		let drawStringHealth = "health: " + Math.floor(Game.state.playerHealth);
 		let height = Game.CTX.measureText(drawStringHealth).actualBoundingBoxAscent;
 		Game.CTX.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
 		
 		Game.CTX.fillStyle = "gold";
-		let drawStringMoney = "money: " + Game.state.money;
+		let drawStringMoney = "money: " + Math.floor(Game.state.money);
 		let measure = Game.CTX.measureText(drawStringMoney);
 		Game.CTX.fillText(drawStringMoney, Game.CANV.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
 	}
