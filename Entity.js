@@ -40,7 +40,7 @@ class HQ extends Entity {
 class TowerType {
 	static MG = new TowerType(new Vector2(48, 48), 2, 60, 6);
 	static SNIPER = new TowerType(new Vector2(32, 32), 8, 40, 30);
-	static ROCKET = new TowerType(new Vector2(32, 32), 10, 55, 30);
+	static ROCKET = new TowerType(new Vector2(32, 32), 16, 120, 15);
 
 	constructor(size, damage, cost, maxShootCooldown) {
 		this.size = size;
@@ -299,25 +299,42 @@ class EnemyType {
 }
 
 class Enemy extends Entity {
-	constructor(x, y, asCenter, type, startArmor) {
+	constructor(x, y, asCenter, type, startHealth) {
 		super(x, y, asCenter, type.size.x, type.size.y, ColliderShapes.SQUARE);
 		this.hasTarget = false;
 		this.vel = new Vector2(0, 0);
-		this.armor = startArmor;
+		this.startHealth = startHealth;
+		this.health = startHealth;
 		this.isDead = false;
 		this.type = type;
 	}
 	
 	draw() {
-		if(this.armor >= 8) {
+		
+		if(this.health / this.startHealth > 0.66) {
 			Game.CTX.fillStyle = "green";
-		} else if(this.armor >= 4) {
+		} else if(this.health / this.startHealth > 0.33) {
 			Game.CTX.fillStyle = "yellow";
 		} else {
 			Game.CTX.fillStyle = "red";
 		}
 		
 		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.type.size.x, this.type.size.y);
+		
+		if(this.type == EnemyType.BOSS) {
+			let healthHeigth = this.rect.bottom + 2;
+			//red
+			Game.CTX.fillStyle = "red";
+			Game.CTX.fillRect(this.rect.left, healthHeigth, this.rect.width, 2);
+			console.log("test");
+			
+			//green
+			let healthPerc = this.health / this.startHealth;
+			let gBarSize = Math.ceil(healthPerc * this.rect.width);
+			
+			Game.CTX.fillStyle = "green";
+			Game.CTX.fillRect(this.rect.left, healthHeigth, gBarSize, 2);
+		}
 	}
 		
 	update() {
@@ -332,8 +349,8 @@ class Enemy extends Entity {
 	}
 	
 	takeDamage(damage, index) {	
-		if(this.armor > 0) {	
-			this.armor = this.armor - damage;
+		if(this.health > 0) {	
+			this.health = this.health - damage;
 		} else {
 			Game.state.enemies.splice(index, 1);
 			this.isDead = true;
