@@ -187,8 +187,12 @@ class Tower extends Entity {
 				speedToEnemy.y += (Math.random() - 0.5) * 4;
 			}
 			
-			let myCenter = this.rect.getCenter();	
-			Game.state.projectiles.push(new Projectile(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y, this.type.damage));
+			let myCenter = this.rect.getCenter();
+			if(this.type == TowerType.MG || this.type == TowerType.SNIPER) {
+				Game.state.projectiles.push(Projectile.MakeBall(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y, this.type.damage));
+			} else if(this.type == TowerType.ROCKET) {
+				Game.state.projectiles.push(Projectile.MakeRocket(myCenter.x, myCenter.y, true, speedToEnemy.x, speedToEnemy.y, this.type.damage, this.target));
+			}
 			return true;
 		} else {
 			return false;
@@ -219,18 +223,53 @@ class Tower extends Entity {
 	}
 }
 
+class ProjectileType {
+	static BALL = new ProjectileType();
+	static ROCKET = new ProjectileType();
+	constructor() {
+
+	}
+}
+
 class Projectile extends Entity {
 	static SIZE = new Vector2(16, 16);
 	
-	constructor(x, y, asCenter, startVelX, startVelY, damage) {
+	static MakeBall(x, y, asCenter, startVelX, startVelY, damage) {
+		return new Projectile(x, y, asCenter, startVelX, startVelY, damage, null, ProjectileType.BALL);
+	}
+	
+	static MakeRocket(x, y, asCenter, startVelX, startVelY, damage, target) {
+		return new Projectile(x, y, asCenter, startVelX, startVelY, damage, target, ProjectileType.ROCKET);
+	}
+	
+	constructor(x, y, asCenter, startVelX, startVelY, damage, target, type) {
 		super(x, y, asCenter, Projectile.SIZE.x, Projectile.SIZE.y, ColliderShapes.SQUARE);
 		this.vel = new Vector2(startVelX, startVelY);
 		this.damage = damage;
+		this.type = type;
+		this.target = target;
 	}
 	
 	draw() {
-		Game.CTX.fillStyle = "blue";
-		Game.CTX.drawImage(AssetManager.PROJECTILE_SPRITE, this.rect.left, this.rect.top);
+		if(this.type == ProjectileType.BALL) {
+			Game.CTX.drawImage(AssetManager.PROJECTILE_SPRITE, this.rect.left, this.rect.top);
+		}
+		else if(this.type == ProjectileType.ROCKET) {
+			
+			let angle = Math.atan2(this.vel.y, this.vel.x) + 2*Math.PI * (3/4);
+			let center = this.rect.getCenter();
+			
+			Game.CTX.save();
+			
+			Game.CTX.translate(center.x, center.y);
+			Game.CTX.rotate(angle);
+			Game.CTX.drawImage(AssetManager.ROCKET_PROJECTILE_SPRITE, -32 / 2, -32 / 2);
+			
+			Game.CTX.restore();
+		} else {
+			//unknown projectile type
+			debugger;
+		}
 	}
 	
 	update(index) {
@@ -240,6 +279,10 @@ class Projectile extends Entity {
 		if(this.rect.bottom < 0 || this.rect.top > Game.CANV.height ||
 			this.rect.right < 0 || this.rect.left > Game.CANV.width) {
 			Game.state.projectiles.splice(index, 1);
+		}
+		
+		if(this.type == ProjectileType.ROCKET && this.target != null && this.target.isDead) {
+			this.target == null;
 		}
 	}
 }

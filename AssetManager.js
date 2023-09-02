@@ -28,6 +28,7 @@ class AssetManager {
 		
 		//projectile
 		AssetManager.PROJECTILE_SPRITE = AssetManager.getTexture("cannon_ball.png");
+		AssetManager.ROCKET_PROJECTILE_SPRITE = AssetManager.getTexture("rocket.png");
 		
 		//mg turret
 		//base
@@ -47,7 +48,7 @@ class AssetManager {
 		//rocket turret
 		AssetManager.ROCKET_TURRET_BASE = AssetManager.getTexture("rocket_turret_base.png");
 		AssetManager.ROCKET_TURRET_HEAD = AssetManager.getTexture("rocket_turret_head.png");
-		AssetManager.ROCKET_TURRET_ICON = AssetManager.SNIPER_TURRET_ICON;
+		AssetManager.ROCKET_TURRET_ICON = AssetManager.getTexture("rocket_button.png");
 	}
 	
 	static getTexture(fileName) {
