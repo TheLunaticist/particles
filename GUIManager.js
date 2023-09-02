@@ -3,6 +3,7 @@
 class GUIManager {
 	static BUTTON_MG;
 	static BUTTON_SNIPER;
+	static ROCKET_BUTTON;
 	
 	static MENU_OFFSET = 25;
 	static MENU_BUTTON_SIZE = 56;
@@ -11,6 +12,7 @@ class GUIManager {
 	static init() {
 		GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_ICON, TowerType.SNIPER);
 		GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_ICON, TowerType.MG);
+		GUIManager.ROCKET_BUTTON = new Clickable(GUIManager.MENU_OFFSET * 3 + GUIManager.MENU_BUTTON_SIZE * 2, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.ROCKET_TURRET_ICON, TowerType.ROCKET);
 	}
 	
 	static draw() {
@@ -18,6 +20,7 @@ class GUIManager {
 		GUIRenderer.drawStats();
 		GUIManager.BUTTON_SNIPER.draw();
 		GUIManager.BUTTON_MG.draw();
+		GUIManager.ROCKET_BUTTON.draw();
 	}
 	
 	static update() {
@@ -31,6 +34,10 @@ class GUIManager {
 		}
 		else if(GUIManager.BUTTON_MG.rect.isInside(new Vector2(x, y))) {
 			GUIManager.BUTTON_MG.handleClick();
+			return false;
+		}
+		else if(GUIManager.ROCKET_BUTTON.rect.isInside(new Vector2(x, y))) {
+			GUIManager.ROCKET_BUTTON.handleClick();
 			return false;
 		}
 		else {

@@ -40,6 +40,7 @@ class HQ extends Entity {
 class TowerType {
 	static MG = new TowerType(new Vector2(48, 48), 2, 60, 6);
 	static SNIPER = new TowerType(new Vector2(32, 32), 8, 40, 30);
+	static ROCKET = new TowerType(new Vector2(32, 32), 10, 55, 30);
 
 	constructor(size, damage, cost, maxShootCooldown) {
 		this.size = size;
@@ -135,6 +136,26 @@ class Tower extends Entity {
 			Game.CTX.translate(center.x, center.y);
 			Game.CTX.rotate(angle);
 			Game.CTX.drawImage(AssetManager.MG_TURRET_HEAD, -48 / 2, -48 / 2);
+			
+			Game.CTX.restore();
+		} else if(this.type == TowerType.ROCKET) {
+			//base
+			Game.CTX.drawImage(AssetManager.ROCKET_TURRET_BASE, this.rect.left, this.rect.top);
+			//head
+			Game.CTX.save();
+			
+			let angle;
+			if(this.target != undefined) {
+				let targetVector = Vector2.subtract(this.target.rect.getCenter(), this.rect.getCenter());
+				angle = Math.atan2(targetVector.y, targetVector.x) + 2*Math.PI * (3/4);
+			} else {
+				angle = 0;
+			}
+			
+			let center = this.rect.getCenter();
+			Game.CTX.translate(center.x, center.y);
+			Game.CTX.rotate(angle);
+			Game.CTX.drawImage(AssetManager.ROCKET_TURRET_HEAD, -32 / 2, -32 / 2);
 			
 			Game.CTX.restore();
 		} else {

@@ -16,6 +16,10 @@ class AssetManager {
 	static MG_TURRET_HEAD;
 	static MG_TURRET_ICON;
 	
+	static ROCKET_TURRET_HEAD;
+	static ROCKET_TURRET_BASE;
+	static ROCKET_TURRET_ICON;
+	
 	static loadThenCall(func) {
 		AssetManager.funcToCall = func;
 		
@@ -40,6 +44,10 @@ class AssetManager {
 		AssetManager.SNIPER_TURRET_HEAD = AssetManager.getTexture("sniper_turret_head.png");
 		AssetManager.SNIPER_TURRET_ICON = AssetManager.getTexture("sniper_button.png");
 		
+		//rocket turret
+		AssetManager.ROCKET_TURRET_BASE = AssetManager.getTexture("rocket_turret_base.png");
+		AssetManager.ROCKET_TURRET_HEAD = AssetManager.getTexture("rocket_turret_head.png");
+		AssetManager.ROCKET_TURRET_ICON = AssetManager.SNIPER_TURRET_ICON;
 	}
 	
 	static getTexture(fileName) {
