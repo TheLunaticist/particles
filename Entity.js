@@ -38,9 +38,9 @@ class HQ extends Entity {
 }
 
 class TowerType {
-	static MG = new TowerType(new Vector2(48, 48), 2, 60, 6);
-	static SNIPER = new TowerType(new Vector2(32, 32), 8, 40, 30);
-	static ROCKET = new TowerType(new Vector2(32, 32), 16, 120, 15);
+	static MG = new TowerType(new Vector2(48, 48), 2, 55, 6);
+	static SNIPER = new TowerType(new Vector2(32, 32), 8, 30, 30);
+	static ROCKET = new TowerType(new Vector2(32, 32), 16, 100, 10);
 
 	constructor(size, damage, cost, maxShootCooldown) {
 		this.size = size;
@@ -263,7 +263,7 @@ class Projectile extends Entity {
 			
 			Game.CTX.translate(center.x, center.y);
 			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.ROCKET_PROJECTILE_SPRITE, -32 / 2, -32 / 2);
+			Game.CTX.drawImage(AssetManager.ROCKET_PROJECTILE_SPRITE, -16 / 2, -22 / 2);
 			
 			Game.CTX.restore();
 		} else {
@@ -326,7 +326,6 @@ class Enemy extends Entity {
 			//red
 			Game.CTX.fillStyle = "red";
 			Game.CTX.fillRect(this.rect.left, healthHeigth, this.rect.width, 2);
-			console.log("test");
 			
 			//green
 			let healthPerc = this.health / this.startHealth;
