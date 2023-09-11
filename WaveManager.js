@@ -40,6 +40,9 @@ class WaveManager {
 				Game.state.enemies.push(new Enemy(attackOrigin.x + spawnOffset.x, attackOrigin.y + spawnOffset.y, true, EnemyType.BOSS, 70 + WaveManager.waveCount));
 			}
 		}
+		if(WaveManager.waveCount >= 0 && WaveManager.waveCount % 4 == 0) {
+			Game.state.enemies.push(new Enemy(attackOrigin.x, attackOrigin.y, true, EnemyType.BIG_ARMORED, 4));
+		} 
 		
 	}
 	

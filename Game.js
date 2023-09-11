@@ -113,6 +113,9 @@ class State {
 		for(let e = this.enemies.length - 1; e >= 0; e--) {
 			for(let p = this.projectiles.length - 1; p >= 0; p--) {
 				if(this.enemies[e].doesEntityCollideWith(this.projectiles[p])) {
+					if(this.enemies[e].type.isArmored && this.projectiles[p].killsArmor == false) {
+						break;
+					}
 					let damage = this.projectiles[p].damage;
 					this.projectiles.splice(p, 1);
 					let enemyDied = this.enemies[e].takeDamage(damage, e);

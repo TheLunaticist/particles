@@ -224,10 +224,10 @@ class Tower extends Entity {
 }
 
 class ProjectileType {
-	static BALL = new ProjectileType();
-	static ROCKET = new ProjectileType();
-	constructor() {
-
+	static BALL = new ProjectileType(false);
+	static ROCKET = new ProjectileType(true);
+	constructor(killsArmor) {
+		this.killsArmor = killsArmor;
 	}
 }
 
@@ -288,13 +288,15 @@ class Projectile extends Entity {
 }
 
 class EnemyType {
-	static SMALL = new EnemyType(new Vector2(8, 8), 1);
-	static BIG = new EnemyType(new Vector2(16, 16), 2);
-	static BOSS = new EnemyType(new Vector2(48, 48), 10);
+	static SMALL = new EnemyType(new Vector2(8, 8), 1, false);
+	static BIG = new EnemyType(new Vector2(16, 16), 2, false);
+	static BOSS = new EnemyType(new Vector2(48, 48), 10, false);
+	static BIG_ARMORED = new EnemyType(new Vector2(18, 18), 4, true);
 	
-	constructor(size, reward) {
+	constructor(size, reward, isArmored) {
 		this.size = size;
 		this.reward = reward;
+		this.isArmored = isArmored;
 	}
 }
 
@@ -320,6 +322,11 @@ class Enemy extends Entity {
 		}
 		
 		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.type.size.x, this.type.size.y);
+		
+		if(this.type.isArmored) {
+			Game.CTX.fillStyle = "black";
+			Game.CTX.fillRect(this.rect.upperLeft.x + 2, this.rect.upperLeft.y + 2, this.type.size.x - 4, this.type.size.y - 4);
+		}
 		
 		if(this.type == EnemyType.BOSS) {
 			let healthHeigth = this.rect.bottom + 2;
