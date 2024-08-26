@@ -1,6 +1,6 @@
 "use strict";
 
-class Vector2 {
+export class Vector2 {
 	constructor(x, y) {
 		if(typeof(x) != "number" || typeof(y) != "number") {
 			let err = new Error();

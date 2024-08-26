@@ -1,6 +1,10 @@
 "use strict";
 
-class InputManager {
+import { Game } from "./game.js";
+import { GUIManager } from "./guiManager.js";
+import { Vector2 } from "./vector2.js";
+
+export class InputManager {
 	static curMouseX = 0;
 	static curMouseY = 0;
 	

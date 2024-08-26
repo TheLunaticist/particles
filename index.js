@@ -1,5 +1,8 @@
 "use strict";
 
+import { AssetManager } from "./modules/assetManager.js";
+import { Game } from "./modules/game.js";
+
 class Looper {
 	static lastFrameTS;
 	static THROTTLE_FPS = false;
@@ -27,7 +30,5 @@ function startGame() {
 
 //game start
 AssetManager.loadThenCall(startGame);
-
-
 
 

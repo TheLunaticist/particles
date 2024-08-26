@@ -1,6 +1,10 @@
 "use strict";
 
-class WaveManager {
+import { Vector2, } from "./vector2.js";
+import { Game, } from "./game.js";
+import { Enemy, EnemyType, } from "./entity.js";
+
+export class WaveManager {
 	static BASE_ENEMY_AMOUNT = 5;
 	static BASE_WAVE_TIME = 60;
 	static waveTime;

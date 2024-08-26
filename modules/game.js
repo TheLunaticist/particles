@@ -1,6 +1,13 @@
 "use strict";
 
-class Game {
+import { GameStages, StartConfig, MoneyConfig, } from "./constants.js";
+import { HQ, TowerType, Tower, } from "./entity.js";
+import { WaveManager, } from "./waveManager.js";
+import { InputManager, } from "./inputManager.js";
+import { GUIManager, GUIRenderer, } from "./guiManager.js";
+import { Colors, } from "./constants.js";
+
+export class Game {
 	static CANV;
 	static CTX;
 	
@@ -38,7 +45,7 @@ class Game {
 	}
 }
 
-class State {
+export class State {
 	constructor() {
 		this.time = 0;
 		this.projectiles = [];

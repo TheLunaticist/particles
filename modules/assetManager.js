@@ -1,6 +1,6 @@
 "use strict";
 
-class AssetManager {
+export class AssetManager {
 	static IMAGE_PATH = "assets\\textures\\";
 	static imagesToLoad = 0;
 	static funcToCall;

@@ -1,6 +1,8 @@
 "use strict";
 
-class Rectangle {
+import { Vector2 } from "./vector2.js";
+
+export class Rectangle {
 	constructor(x, y, width, height) {
 		this.upperLeft = new Vector2(x, y);
 		this.size = new Vector2(width, height);

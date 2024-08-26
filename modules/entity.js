@@ -1,6 +1,12 @@
 "use strict";
 
-class Entity {
+import { Vector2 } from "./vector2.js";
+import { ColliderShapes, Colors } from "./constants.js";
+import { Rectangle } from "./rectangle.js";
+import { Game } from "./game.js";
+import { AssetManager } from "./assetManager.js";
+
+export class Entity {
 	constructor(x, y, asCenter, width, height, colliderShape) {
 		if(asCenter) {
 			this.rect = new Rectangle(x - width / 2, y - height / 2, width, height);
@@ -25,7 +31,7 @@ class Entity {
 	}
 }
 
-class HQ extends Entity {
+export class HQ extends Entity {
 	static SIZE = new Vector2(40, 40);
 	
 	constructor(x, y, asCenter) {	
@@ -37,7 +43,7 @@ class HQ extends Entity {
 	}
 }
 
-class TowerType {
+export class TowerType {
 	static MG = new TowerType(new Vector2(48, 48), 2, 55, 6);
 	static SNIPER = new TowerType(new Vector2(32, 32), 8, 30, 30);
 	static ROCKET = new TowerType(new Vector2(32, 32), 16, 100, 10);
@@ -50,7 +56,7 @@ class TowerType {
 	}
 }
 
-class Tower extends Entity {
+export class Tower extends Entity {
 	static drawBlueprint(x, y, type) {
 		if(Game.state.money >= 40 && Tower.canPlace(x, y, type)) {
 			Game.CTX.fillStyle = Colors.BP;
@@ -223,7 +229,7 @@ class Tower extends Entity {
 	}
 }
 
-class ProjectileType {
+export class ProjectileType {
 	static BALL = new ProjectileType(false);
 	static ROCKET = new ProjectileType(true);
 	constructor(killsArmor) {
@@ -231,7 +237,7 @@ class ProjectileType {
 	}
 }
 
-class Projectile extends Entity {
+export class Projectile extends Entity {
 	static SIZE = new Vector2(16, 16);
 	
 	static MakeBall(x, y, asCenter, startVelX, startVelY, damage) {
@@ -287,7 +293,7 @@ class Projectile extends Entity {
 	}
 }
 
-class EnemyType {
+export class EnemyType {
 	static SMALL = new EnemyType(new Vector2(8, 8), 1, false);
 	static BIG = new EnemyType(new Vector2(16, 16), 2, false);
 	static BOSS = new EnemyType(new Vector2(48, 48), 10, false);
@@ -300,7 +306,7 @@ class EnemyType {
 	}
 }
 
-class Enemy extends Entity {
+export class Enemy extends Entity {
 	constructor(x, y, asCenter, type, startHealth) {
 		super(x, y, asCenter, type.size.x, type.size.y, ColliderShapes.SQUARE);
 		this.hasTarget = false;

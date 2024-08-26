@@ -1,6 +1,13 @@
 "use strict";
 
-class GUIManager {
+import { Game, } from "./game.js";
+import { AssetManager, } from "./assetManager.js";
+import { TowerType, Tower, } from "./entity.js";
+import { Rectangle, } from "./rectangle.js";
+import { InputManager } from "./inputManager.js";
+import { Vector2 } from "./vector2.js";
+
+export class GUIManager {
 	static BUTTON_MG;
 	static BUTTON_SNIPER;
 	static ROCKET_BUTTON;
@@ -46,7 +53,7 @@ class GUIManager {
 	}
 }
 
-class GUIRenderer {
+export class GUIRenderer {
 	static STAT_FONT = "36px Orbitron";
 	static STAT_OFFSET = 25;
 	
@@ -79,7 +86,7 @@ class GUIRenderer {
 	}
 }
 
-class Clickable {
+export class Clickable {
 	constructor(x, y, width, heigth, img, towerType) {
 		this.rect = new Rectangle(x, y, width, heigth);
 		this.img = img;
