@@ -73,6 +73,10 @@ export class ScreenManager {
 	window.addEventListener("resize", (e) => {
 	    ScreenManager.activeScreen.draw();
 	});
+
+	ScreenManager.CANVAS.addEventListener("mousemove", (e) => {
+	    ScreenManager.activeScreen.onMouseMove?.();
+	});
     }
 
     static renderLoop() {
@@ -89,6 +93,7 @@ class Screen {
     constructor(screenArguments = {}) {
 	this.onOpen = screenArguments.onOpen;
 	this.onClose = screenArguments.onClose;
+	this.onMouseMove = screenArguments.onMouseMove;
 	this.uiElements = screenArguments.uiElements;
 	this.doRendering = screenArguments.doRendering;
     }
