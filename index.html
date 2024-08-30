@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="style.css" defer></link>
+
 		<link rel="icon" type="image/ico" href="assets/icon.ico">
 		<title> Particles </title>
 	
@@ -8,11 +10,12 @@
 		<meta property="og:article:author:" content="Lunaticist">
 
 		<script src="index.js" type="module" defer></script>
-
-		<link rel="stylesheet" href="style.css"></link>
 	</head>
-	<body>
+	<body style="visibility: hidden">
 		<canvas height="900" width="1800" id="particlesCanvas"></canvas>
+		<script defer>
+		    //unveiling
+		    window.document.body.style.visibility = 'visible';
+		</script>
 	</body>
 </html>
-

@@ -23,7 +23,7 @@ export class Game {
 		Game.CANV = canvas;
 		Game.CTX = Game.CANV.getContext("2d");
 		
-		Game.state = new State();
+		Game.state = new GameState();
 		
 		WaveManager.init();
 		InputManager.init();
@@ -45,7 +45,7 @@ export class Game {
 	}
 }
 
-export class State {
+class GameState {
 	constructor() {
 		this.time = 0;
 		this.projectiles = [];

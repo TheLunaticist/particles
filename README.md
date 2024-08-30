@@ -8,3 +8,4 @@ Decide on the right stratergy to kill them all.
   - money maker (invest for later profit)
   - laser turret (aoe turret with slow moving laser beam)
   - melee tower (generate damage points which are spent to damage enemies on contact)
+- proper error screen

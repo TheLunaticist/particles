@@ -2,33 +2,12 @@
 
 import { AssetManager } from "./modules/assetManager.js";
 import { Game } from "./modules/game.js";
-
-class Looper {
-	static lastFrameTS;
-	static THROTTLE_FPS = false;
-	static skippedLast = false;
-	
-	static loop() {
-		//while(Date.now() - Looper.lastFrameTS < Game.MS_PER_FRAME) {}
-		
-		if(!Game.throttleFps || Looper.skippedLast) {
-			Game.doFrame();
-		}
-		
-		Looper.skippedLast = !Looper.skippedLast;
-		
-		//Looper.lastFrameTS = Date.now();
-		window.requestAnimationFrame(Looper.loop);
-	}
-}
+import { ScreenManager } from "./modules/screenManager.js";
 
 function startGame() {
-	Game.init(document.getElementById("particlesCanvas"));
-	Looper.loop();
+    Game.init(document.getElementById("particlesCanvas"));
+    ScreenManager.setActiveScreen(ScreenManager.START_SCREEN);
 }
-
 
 //game start
 AssetManager.loadThenCall(startGame);
-
-
