@@ -12,11 +12,14 @@
 		<script src="index.js" type="module" defer></script>
 	</head>
 	<body style="visibility: hidden">
-		<canvas id="particlesCanvas"></canvas>
+		<canvas id="canvas"></canvas>
 		<script>
-		    let clientRect = particlesCanvas.getClientRects()[0];
-		    particlesCanvas.width = clientRect.width;
-		    particlesCanvas.height = clientRect.height;
+		    //making the game initially fit to the screen
+		    //this is updated later
+		    let clientRect = canvas.getClientRects()[0];
+		    canvas.width = clientRect.width;
+		    canvas.height = clientRect.height
+
 		    //unveiling
 		    window.document.body.style.visibility = 'visible';
 		</script>

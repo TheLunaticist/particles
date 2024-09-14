@@ -59,7 +59,7 @@ export class ScreenManager {
 	    continueRendering: true,
 	});
 
-	let canvas = document.getElementById("particlesCanvas");
+	let canvas = document.getElementById("canvas");
 	if(canvas === undefined) {
 	    console.error("Couldn't get canvas.");
 	    debugger;
