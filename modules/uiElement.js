@@ -1,7 +1,5 @@
 "use strict";
 
-import { ScreenManager } from "./screenManager.js";
-
 export class HorizontalAnchor {
     static LEFT = "LEFT";
     static MIDDLE = "MIDDLE";
@@ -26,9 +24,9 @@ class UIElement {
 	if(this.anchorVertical === VerticalAnchor.LEFT) {
 	    return 0;
 	} else if(this.anchorVertical === VerticalAnchor.MIDDLE) {
-	    return ScreenManager.CANVAS.height / 2;
+	    return canvas.height / 2;
 	} else if(this.anchorVertical === VerticalAnchor.RIGHT) {
-	    return ScreenManager.CANVAS.height;
+	    return canvas.height;
 	} else {
 	    debugger;
 	}
@@ -38,9 +36,9 @@ class UIElement {
 	if(this.anchorHorizontal === HorizontalAnchor.TOP) {
 	    return 0;
 	} else if(this.anchorHorizontal === HorizontalAnchor.MIDDLE) {
-	    return ScreenManager.CANVAS.width / 2;
+	    return canvas.width / 2;
 	} else if(this.anchorHorizontal === HorizontalAnchor.BOTTOM) {
-	    return ScreenManager.CANVAS.width;
+	    return canvas.width;
 	} else {
 	    debugger;
 	}
@@ -58,11 +56,11 @@ export class UIText extends UIElement {
     }
 
     draw() {
-	ScreenManager.CONTEXT.font = "48px orbitron";
-	ScreenManager.CONTEXT.fillStyle = "red";
-	let textMetrics = ScreenManager.CONTEXT.measureText(this.text);
+	ctx.font = "48px orbitron";
+	ctx.fillStyle = "red";
+	let textMetrics = ctx.measureText(this.text);
 	let textWidth = textMetrics.width;
-	ScreenManager.CONTEXT.fillText(this.text, this.getAnchorHorizontal() - textMetrics.width / 2, this.getAnchorVertical());
+	ctx.fillText(this.text, this.getAnchorHorizontal() - textMetrics.width / 2, this.getAnchorVertical());
     }
 }
 
