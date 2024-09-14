@@ -77,4 +77,7 @@ export class UIButton extends UIElement {
     }
 
     draw() {}
+
+    onMouseDown(e) {
+    }
 }

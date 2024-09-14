@@ -15,7 +15,7 @@ export class ScreenManager {
     static START_SCREEN;
     static GAME_SCREEN;
 
-    static activeScreen;
+    static activeScreen = null;
 
     static setActiveScreen(screen) {
 	let oldScreen = ScreenManager.activeScreen;
@@ -39,6 +39,9 @@ export class ScreenManager {
 	ScreenManager.START_SCREEN = new Screen({
 	    continueRendering: false,
 	    onOpen: function() {
+		this.draw();
+	    },
+	    onDraw: function() {
 		ScreenManager.CONTEXT.fillStyle = "rgb(0, 0, 0)";
 		ScreenManager.CONTEXT.fillRect(0, 0, ScreenManager.CANVAS.width, ScreenManager.CANVAS.height);
 	    },
@@ -75,7 +78,9 @@ export class ScreenManager {
 	});
 
 	ScreenManager.CANVAS.addEventListener("mousemove", (e) => {
-	    ScreenManager.activeScreen.onMouseMove?.();
+	    if(ScreenManager.activeScreen !== null) {
+		ScreenManager.activeScreen.onMouseMove?.();
+	    }
 	});
     }
 
@@ -93,12 +98,15 @@ class Screen {
     constructor(screenArguments = {}) {
 	this.onOpen = screenArguments.onOpen;
 	this.onClose = screenArguments.onClose;
+	this.onDraw = screenArguments.onDraw;
 	this.onMouseMove = screenArguments.onMouseMove;
 	this.uiElements = screenArguments.uiElements;
 	this.doRendering = screenArguments.doRendering;
     }
 
     draw() {
+	this.onDraw?.();
+
 	this.uiElements?.forEach((e) => {
 	    e.draw();
 	})

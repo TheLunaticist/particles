@@ -10,4 +10,5 @@ function startGame() {
 }
 
 //game start
-AssetManager.loadThenCall(startGame);
+await AssetManager.load().catch((errors) => console.log(errors));
+startGame();

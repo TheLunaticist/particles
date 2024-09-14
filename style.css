@@ -1,6 +1,7 @@
 @font-face {
     font-family: orbitron;
     src: url(./assets/fonts/Orbitron-Regular.ttf);
+}
 
 html {
     height: 100%;
