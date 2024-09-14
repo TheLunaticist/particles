@@ -12,8 +12,11 @@
 		<script src="index.js" type="module" defer></script>
 	</head>
 	<body style="visibility: hidden">
-		<canvas height="900" width="1800" id="particlesCanvas"></canvas>
+		<canvas id="particlesCanvas"></canvas>
 		<script>
+		    let clientRect = particlesCanvas.getClientRects()[0];
+		    particlesCanvas.width = clientRect.width;
+		    particlesCanvas.height = clientRect.height;
 		    //unveiling
 		    window.document.body.style.visibility = 'visible';
 		</script>

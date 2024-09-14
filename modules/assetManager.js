@@ -8,6 +8,7 @@ export class AssetManager {
     static async load() {
 	let promises = [];
 
+	//textures
 	const loadTexture = AssetManager.loadTexture;
 	//misc
 	loadTexture("hq", promises);
@@ -24,6 +25,9 @@ export class AssetManager {
 	loadTexture("rocket_turret_base", promises);
 	loadTexture("rocket_turret_head", promises);
 	loadTexture("rocket_button", promises);
+
+	//fonts
+	AssetManager.loadFont("Orbitron", "url(./assets/fonts/Orbitron-Regular.ttf)", promises);
 
 	let results = await Promise.allSettled(promises);
 	let rejectReasons = [];
@@ -50,6 +54,17 @@ export class AssetManager {
 	    image.src = AssetManager.TEXTURE_PATH + name + ".png";
 	}));
     }
+
+    static loadFont(name, src, promiseCollector) {
+	const fontFace = new FontFace(
+	    name,
+	    src,
+	);
+
+	document.fonts.add(fontFace);
+
+	promiseCollector.push(fontFace.load());
+    }
 }
 
 class AssetManagerError extends Error {
@@ -60,7 +75,7 @@ class AssetManagerError extends Error {
 
 class LoadTextureError extends AssetManagerError {
     constructor(rejectReasons, numberOfThingsToLoad) {
-	super(`Unable to load some of the textures. [${rejectReasons.length}/${numberOfThingsToLoad}]`);
+	super(`Unable to load some of the assets. [${rejectReasons.length}/${numberOfThingsToLoad}]`);
 	this.name = "LoadTextureError";
 	this.rejectReasons = rejectReasons;
     }

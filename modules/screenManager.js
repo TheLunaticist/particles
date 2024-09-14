@@ -74,6 +74,9 @@ export class ScreenManager {
 	ScreenManager.CONTEXT = context;
 
 	window.addEventListener("resize", (e) => {
+	    let clientRect = ScreenManager.CANVAS.getClientRects()[0];
+	    ScreenManager.CANVAS.width = clientRect.width;
+	    ScreenManager.CANVAS.height = clientRect.height;
 	    ScreenManager.activeScreen.draw();
 	});
 

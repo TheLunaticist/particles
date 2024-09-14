@@ -10,5 +10,5 @@ function startGame() {
 }
 
 //game start
-await AssetManager.load().catch((errors) => console.log(errors));
+await AssetManager.load().catch((error) => { console.log(error); console.log(error.rejectReasons);});
 startGame();
