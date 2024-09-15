@@ -1,4 +1,7 @@
 "use strict";
+
+import { LoggableError } from "/m/debug.js";
+
 export class AssetManager {
     static TEXTURE_PATH = ".\\assets\\textures\\";
 
@@ -26,6 +29,8 @@ export class AssetManager {
 	loadTexture("rocket_turret_head", promises);
 	loadTexture("rocket_button", promises);
 
+	loadTexture("notexisting", promises);
+
 	//fonts
 	AssetManager.loadFont("Orbitron", "url(./assets/fonts/Orbitron-Regular.ttf)", promises);
 
@@ -38,7 +43,7 @@ export class AssetManager {
 	});
 
 	if(rejectReasons.length !== 0) {
-	    return Promise.reject(new LoadTextureError(rejectReasons, AssetManager.textureNumber));
+	    return Promise.reject(new LoadAssetError(rejectReasons, AssetManager.textureNumber));
 	}
     }
 
@@ -67,16 +72,15 @@ export class AssetManager {
     }
 }
 
-class AssetManagerError extends Error {
-    constructor(message) {
-	super(message);
-    }
-}
-
-class LoadTextureError extends AssetManagerError {
-    constructor(rejectReasons, numberOfThingsToLoad) {
-	super(`Unable to load some of the assets. [${rejectReasons.length}/${numberOfThingsToLoad}]`);
-	this.name = "LoadTextureError";
+export class LoadAssetError extends LoggableError {
+    constructor(rejectReasons, assetCount) {
+	super("Unable to load all textures.");
+	this.name = "AssetManager::LoadAssetError";
 	this.rejectReasons = rejectReasons;
+	this.totalAssetCount = assetCount;
+    }
+
+    log() {
+	console.error(this.name + ":", this.message + ` [${this.totalAssetCount - this.rejectReasons.length}/${this.totalAssetCount}]\nerror events:`, this.rejectReasons);
     }
 }

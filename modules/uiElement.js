@@ -2,6 +2,7 @@
 
 import { Rectangle } from "./rectangle.js";
 import { Vector2 } from "./vector2.js";
+import { ScreenManager } from "/m/screenManager.js";
 
 export class HorizontalAnchor {
     static LEFT = "LEFT";
@@ -58,6 +59,10 @@ class UIElement {
     draw() {}
 
     mouseMove() {}
+
+    markScreenForRedraw() {
+	ScreenManager.markForRedraw();
+    }
 }
 
 export class UIText extends UIElement {
@@ -110,13 +115,13 @@ export class UIButton extends UIElement {
 	    if(buttonRect.isPointInside(mousePos)) {
 		console.log("activated");
 		this.isHoveredOver = true;
-		this.draw();
+		this.markScreenForRedraw();
 	    }
 	} else {
 	    if(!buttonRect.isPointInside(mousePos)) {
 		console.log("deactivated");
 		this.isHoveredOver = false;
-		this.draw();
+		this.markScreenForRedraw();
 	    }
 	}
     }

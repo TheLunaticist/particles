@@ -1,8 +1,9 @@
 "use strict";
 
-import { AssetManager } from "./modules/assetManager.js";
+import { AssetManager, LoadAssetError } from "./modules/assetManager.js";
 import { Game } from "./modules/game.js";
 import { ScreenManager } from "./modules/screenManager.js";
+
 
 //making canvas context accessible from everywhere
 window.ctx = window.canvas.getContext("2d");
@@ -13,5 +14,14 @@ function startGame() {
 }
 
 //game start
-await AssetManager.load().catch((error) => { console.log(error); console.log(error.rejectReasons);});
+try {
+    await AssetManager.load();
+} catch(e) {
+    if(e instanceof LoadAssetError) {
+	e.log();
+    } else {
+	throw e;
+    }
+}
+
 startGame();

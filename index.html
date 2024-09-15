@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" href="style.css" defer></link>
-
 		<link rel="icon" type="image/ico" href="assets/icon.ico">
 		<title> Particles </title>
-	
+
+		<link rel="stylesheet" href="style.css" defer></link>
+		
+		<script type="importmap">
+		    {
+			"imports": {
+			    "/m/": "/modules/"
+			}
+		    }
+		</script>
+		<script src="index.js" type="module" defer></script>
+
 		<meta property="og:title" content="Play Particles">
 		<meta property="og:article:author:" content="Lunaticist">
-
-		<script src="index.js" type="module" defer></script>
 	</head>
 	<body style="visibility: hidden">
 		<canvas id="canvas"></canvas>

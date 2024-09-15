@@ -3,9 +3,10 @@
 import { StartScreen } from "./screen.js";
 
 export class ScreenManager {
-    static continueRendering;
+    static continueRendering = false;
     static evenFrame = true;
     static lastAnimationFrame = undefined;
+
     static markForRedraw = false;
 
     //screens
@@ -26,6 +27,7 @@ export class ScreenManager {
 	    window.cancelAnimationFrame(lastAnimationFrame);
 	}
 
+	ScreenManager.continueRendering = screen.liveRendering;
 	if(screen.liveRendering === true) {
 	    ScreenManager.lastAnimationFrame = window.requestAnimationFrame(ScreenManager.renderLoop);
 	}
@@ -46,6 +48,11 @@ export class ScreenManager {
 	    if(ScreenManager.activeScreen !== null) {
 		ScreenManager.activeScreen.mouseMove(e);
 	    }
+
+	    if(ScreenManager.markForRedraw) {
+		ScreenManager.activeScreen.draw();
+		ScreenManager.markForRedraw = false;
+	    }
 	});
     }
 
@@ -57,7 +64,10 @@ export class ScreenManager {
 
 	if(ScreenManager.continueRendering) ScreenManager.lastAnimationFrame = window.requestAnimationFrame(ScreenManager.renderLoop);
     }
-}
 
+    static markForRedraw() {
+	this.markForRedraw = true;
+    }
+}
 
 ScreenManager.init();
