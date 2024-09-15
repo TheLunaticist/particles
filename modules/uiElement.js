@@ -1,5 +1,8 @@
 "use strict";
 
+import { Rectangle } from "./rectangle.js";
+import { Vector2 } from "./vector2.js";
+
 export class HorizontalAnchor {
     static LEFT = "LEFT";
     static MIDDLE = "MIDDLE";
@@ -43,6 +46,18 @@ class UIElement {
 	    debugger;
 	}
     }
+
+    get centerX() {
+	return this.getAnchorHorizontal() + this.offset.x;
+    }
+
+    get centerY() {
+	return this.getAnchorVertical() + this.offset.y;
+    }
+
+    draw() {}
+
+    mouseMove() {}
 }
 
 export class UIText extends UIElement {
@@ -58,9 +73,10 @@ export class UIText extends UIElement {
     draw() {
 	ctx.font = "48px orbitron";
 	ctx.fillStyle = "red";
+	ctx.textBaseline = "bottom";
 	let textMetrics = ctx.measureText(this.text);
-	let textWidth = textMetrics.width;
-	ctx.fillText(this.text, this.getAnchorHorizontal() - textMetrics.width / 2, this.getAnchorVertical());
+	let textHeight = textMetrics.emHeightAscent;
+	ctx.fillText(this.text, this.centerX - textMetrics.width / 2, this.centerY + textHeight / 2);
     }
 }
 
@@ -72,10 +88,36 @@ export class UIButton extends UIElement {
     constructor(args = {}) {
 	super(args);
 	this.text = args.text;
+	this.callback = args.callback;
+	
+	this.isHoveredOver = false;
     }
 
-    draw() {}
+    draw() {
+	ctx.font = this.size.y.toString() + "px orbitron";
+	ctx.textBaseline = "bottom";
+	let textMetrics = ctx.measureText(this.text);
+	let textWidth = textMetrics.width;
+	let textHeight = textMetrics.emHeightAscent;
+	ctx.fillStyle = this.isHoveredOver ? "white" : "red";
+	ctx.fillText(this.text, this.centerX - textMetrics.width / 2, this.centerY + textHeight / 2);
+    }
 
-    onMouseDown(e) {
+    mouseMove(e) {
+	let buttonRect = new Rectangle(this.centerX - this.size.x / 2, this.centerY - this.size.y / 2, this.size.x, this.size.y);
+	let mousePos = new Vector2(e.clientX, e.clientY);
+	if(this.isHoveredOver === false) {
+	    if(buttonRect.isPointInside(mousePos)) {
+		console.log("activated");
+		this.isHoveredOver = true;
+		this.draw();
+	    }
+	} else {
+	    if(!buttonRect.isPointInside(mousePos)) {
+		console.log("deactivated");
+		this.isHoveredOver = false;
+		this.draw();
+	    }
+	}
     }
 }

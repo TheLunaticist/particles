@@ -35,15 +35,15 @@ export class GUIManager {
 	}
 	
 	static handleClick(x, y) {
-		if(GUIManager.BUTTON_SNIPER.rect.isInside(new Vector2(x, y))) {
+		if(GUIManager.BUTTON_SNIPER.rect.isPointInside(new Vector2(x, y))) {
 			GUIManager.BUTTON_SNIPER.handleClick();
 			return false;
 		}
-		else if(GUIManager.BUTTON_MG.rect.isInside(new Vector2(x, y))) {
+		else if(GUIManager.BUTTON_MG.rect.isPointInside(new Vector2(x, y))) {
 			GUIManager.BUTTON_MG.handleClick();
 			return false;
 		}
-		else if(GUIManager.ROCKET_BUTTON.rect.isInside(new Vector2(x, y))) {
+		else if(GUIManager.ROCKET_BUTTON.rect.isPointInside(new Vector2(x, y))) {
 			GUIManager.ROCKET_BUTTON.handleClick();
 			return false;
 		}
@@ -98,7 +98,7 @@ export class Clickable {
 	}
 	
 	draw() {
-		if(this.rect.isInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY)) || this.towerType == Game.state.selTowType) {
+		if(this.rect.isPointInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY)) || this.towerType == Game.state.selTowType) {
 			Game.CTX.fillStyle = "White";
 		} else {
 			Game.CTX.fillStyle = "DarkRed";

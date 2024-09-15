@@ -6,6 +6,7 @@ export class ScreenManager {
     static continueRendering;
     static evenFrame = true;
     static lastAnimationFrame = undefined;
+    static markForRedraw = false;
 
     //screens
     static START_SCREEN;
@@ -43,7 +44,7 @@ export class ScreenManager {
 
 	canvas.addEventListener("mousemove", (e) => {
 	    if(ScreenManager.activeScreen !== null) {
-		ScreenManager.activeScreen.mouseMove();
+		ScreenManager.activeScreen.mouseMove(e);
 	    }
 	});
     }

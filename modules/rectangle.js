@@ -7,6 +7,10 @@ export class Rectangle {
 		this.upperLeft = new Vector2(x, y);
 		this.size = new Vector2(width, height);
 	}
+
+	static fromVectors(vA, vB) {
+	    return new Rectangle(vA.x, vA.y, vB.x, vB.y);
+	}
 	
 	getCenter() {
 		return new Vector2(this.upperLeft.x + this.size.x / 2, this.upperLeft.y + this.size.y / 2);
@@ -24,7 +28,7 @@ export class Rectangle {
 		return true;
 	}
 	
-	isInside(pos) {
+	isPointInside(pos) {
 		return pos.x > this.left && pos.x < this.right && pos.y > this.top && pos.y < this.bottom;
 	}
 	
