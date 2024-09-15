@@ -58,10 +58,16 @@ class UIElement {
 
     draw() {}
 
-    mouseMove() {}
+    mouseMove(e) {}
+
+    mouseClick(e) {}
 
     markScreenForRedraw() {
-	ScreenManager.markForRedraw();
+	ScreenManager.redraw();
+    }
+
+    get boundRect() {
+	return new Rectangle(this.centerX - this.size.x / 2, this.centerY - this.size.y / 2, this.size.x, this.size.y);
     }
 }
 
@@ -73,10 +79,18 @@ export class UIText extends UIElement {
     constructor(args = {}) {
 	super(args);
 	this.text = args.text;
+
+	let preCtx = window.canvas.getContext("2d");
+	preCtx.font = this.size.y.toString() + "px orbitron";
+	preCtx.textBaseline = "bottom";
+	let textMetrics = preCtx.measureText(this.text);
+	if(this.size.x < textMetrics.width) {
+	    this.size.x = textMetrics.width + 20;
+	}
     }
 
     draw() {
-	ctx.font = "48px orbitron";
+	ctx.font = this.size.y.toString() + "px orbitron";
 	ctx.fillStyle = "red";
 	ctx.textBaseline = "bottom";
 	let textMetrics = ctx.measureText(this.text);
@@ -96,6 +110,14 @@ export class UIButton extends UIElement {
 	this.callback = args.callback;
 	
 	this.isHoveredOver = false;
+	
+	let preCtx = window.canvas.getContext("2d");
+	preCtx.font = this.size.y.toString() + "px orbitron";
+	preCtx.textBaseline = "bottom";
+	let textMetrics = preCtx.measureText(this.text);
+	if(this.size.x < textMetrics.width) {
+	    this.size.x = textMetrics.width + 20;
+	}
     }
 
     draw() {
@@ -109,20 +131,22 @@ export class UIButton extends UIElement {
     }
 
     mouseMove(e) {
-	let buttonRect = new Rectangle(this.centerX - this.size.x / 2, this.centerY - this.size.y / 2, this.size.x, this.size.y);
+	let buttonRect = this.boundRect;
 	let mousePos = new Vector2(e.clientX, e.clientY);
 	if(this.isHoveredOver === false) {
 	    if(buttonRect.isPointInside(mousePos)) {
-		console.log("activated");
 		this.isHoveredOver = true;
 		this.markScreenForRedraw();
 	    }
 	} else {
 	    if(!buttonRect.isPointInside(mousePos)) {
-		console.log("deactivated");
 		this.isHoveredOver = false;
 		this.markScreenForRedraw();
 	    }
 	}
+    }
+
+    mouseClick(e) {
+	console.log(e);
     }
 }

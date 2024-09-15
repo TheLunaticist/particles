@@ -54,6 +54,10 @@ export class ScreenManager {
 		ScreenManager.markForRedraw = false;
 	    }
 	});
+	
+	canvas.addEventListener("mouseup", (e) => {
+	    this.activeScreen?.mouseClick(e);
+	});	
     }
 
     static renderLoop() {
@@ -65,8 +69,8 @@ export class ScreenManager {
 	if(ScreenManager.continueRendering) ScreenManager.lastAnimationFrame = window.requestAnimationFrame(ScreenManager.renderLoop);
     }
 
-    static markForRedraw() {
-	this.markForRedraw = true;
+    static redraw() {
+	ScreenManager.markForRedraw = true;
     }
 }
 

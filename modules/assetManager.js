@@ -29,8 +29,6 @@ export class AssetManager {
 	loadTexture("rocket_turret_head", promises);
 	loadTexture("rocket_button", promises);
 
-	loadTexture("notexisting", promises);
-
 	//fonts
 	AssetManager.loadFont("Orbitron", "url(./assets/fonts/Orbitron-Regular.ttf)", promises);
 

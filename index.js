@@ -1,8 +1,8 @@
 "use strict";
 
-import { AssetManager, LoadAssetError } from "./modules/assetManager.js";
-import { Game } from "./modules/game.js";
-import { ScreenManager } from "./modules/screenManager.js";
+import { AssetManager, LoadAssetError } from "./m/assetManager.js";
+import { Game } from "./m/game.js";
+import { ScreenManager } from "./m/screenManager.js";
 
 
 //making canvas context accessible from everywhere

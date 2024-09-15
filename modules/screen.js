@@ -20,6 +20,13 @@ class Screen {
 	    element.mouseMove(e);
 	});
     }
+    
+    mouseClick(e) {
+	this.uiElements.forEach((element) => {
+	    element.mouseClick(e);
+	});
+    }
+
 }
 
 export class StartScreen extends Screen {
@@ -30,7 +37,7 @@ export class StartScreen extends Screen {
 		anchorVertical: VerticalAnchor.MIDDLE,
 		anchorHorizontal: HorizontalAnchor.MIDDLE,
 		offset: new Vector2(0, 0),
-		size: new Vector2(0, 48),
+		size: new Vector2(0, 96),
 		text: "Particles",
 	    })
 	);
@@ -38,8 +45,8 @@ export class StartScreen extends Screen {
 	    UIButton.new({
 		anchorVertical: VerticalAnchor.MIDDLE,
 		anchorHorizontal: HorizontalAnchor.MIDDLE,
-		offset: new Vector2(0, 48),
-		size: new Vector2(72, 36),
+		offset: new Vector2(0, 48 + 32),
+		size: new Vector2(0, 64),
 		text: "Play",
 	    })
 	)
