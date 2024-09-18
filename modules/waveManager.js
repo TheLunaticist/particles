@@ -1,8 +1,8 @@
 "use strict";
 
-import { Vector2, } from "./vector2.js";
-import { Game, } from "./game.js";
-import { Enemy, EnemyType, } from "./entity.js";
+import { Vector2 } from "/m/vector2.js";
+import { Game } from "/m/game.js";
+import { Enemy, EnemyType } from "/m/entity.js";
 
 export class WaveManager {
 	static BASE_ENEMY_AMOUNT = 5;
@@ -15,7 +15,7 @@ export class WaveManager {
 	
 	static init() {
 		WaveManager.waveTime = WaveManager.BASE_WAVE_TIME;
-		WaveManager.OFFSCREEN_LENGTH = new Vector2(Game.CANV.width / 2, Game.CANV.height / 2).getLength();
+		WaveManager.OFFSCREEN_LENGTH = new Vector2(canvas.width / 2, canvas.height / 2).getLength();
 	}
 	
 	static update() {

@@ -1,11 +1,11 @@
 "use strict";
 
-import { Game, } from "./game.js";
-import { AssetManager, } from "./assetManager.js";
-import { TowerType, Tower, } from "./entity.js";
-import { Rectangle, } from "./rectangle.js";
-import { InputManager } from "./inputManager.js";
-import { Vector2 } from "./vector2.js";
+import { Game } from "/m/game.js";
+import { AssetManager } from "/m/assetManager.js";
+import { TowerType, Tower } from "/m/entity.js";
+import { Rectangle } from "/m/rectangle.js";
+import { InputManager } from "/m/inputManager.js";
+import { Vector2 } from "/m/vector2.js";
 
 export class GUIManager {
 	static BUTTON_MG;
@@ -17,9 +17,10 @@ export class GUIManager {
 	
 	
 	static init() {
-		GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.SNIPER_TURRET_ICON, TowerType.SNIPER);
-		GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.MG_TURRET_ICON, TowerType.MG);
-		GUIManager.ROCKET_BUTTON = new Clickable(GUIManager.MENU_OFFSET * 3 + GUIManager.MENU_BUTTON_SIZE * 2, Game.CANV.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, AssetManager.ROCKET_TURRET_ICON, TowerType.ROCKET);
+	    let txts = AssetManager.textures;
+	    GUIManager.BUTTON_SNIPER = new Clickable(GUIManager.MENU_OFFSET, canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, txts["sniper_button"], TowerType.SNIPER);
+	    GUIManager.BUTTON_MG = new Clickable(GUIManager.MENU_OFFSET * 2 + GUIManager.MENU_BUTTON_SIZE, canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, txts["mg_button"], TowerType.MG);
+	    GUIManager.ROCKET_BUTTON = new Clickable(GUIManager.MENU_OFFSET * 3 + GUIManager.MENU_BUTTON_SIZE * 2, canvas.height - GUIManager.MENU_OFFSET - GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, GUIManager.MENU_BUTTON_SIZE, txts["rocket_button"], TowerType.ROCKET);
 	}
 	
 	static draw() {
@@ -58,31 +59,31 @@ export class GUIRenderer {
 	static STAT_OFFSET = 25;
 	
 	static drawStats() {
-		Game.CTX.font = GUIRenderer.STAT_FONT;
+		ctx.font = GUIRenderer.STAT_FONT;
 		
-		Game.CTX.fillStyle = "red";
+		ctx.fillStyle = "red";
 		let drawStringHealth = "health: " + Math.floor(Game.state.playerHealth);
-		let height = Game.CTX.measureText(drawStringHealth).actualBoundingBoxAscent;
-		Game.CTX.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
+		let height = ctx.measureText(drawStringHealth).actualBoundingBoxAscent;
+		ctx.fillText(drawStringHealth, 0 + GUIRenderer.STAT_OFFSET, height + GUIRenderer.STAT_OFFSET);
 		
-		Game.CTX.fillStyle = "gold";
+		ctx.fillStyle = "gold";
 		let drawStringMoney = "money: " + Math.floor(Game.state.money);
-		let measure = Game.CTX.measureText(drawStringMoney);
-		Game.CTX.fillText(drawStringMoney, Game.CANV.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
+		let measure = ctx.measureText(drawStringMoney);
+		ctx.fillText(drawStringMoney, canvas.width - measure.width - GUIRenderer.STAT_OFFSET, measure.actualBoundingBoxAscent + GUIRenderer.STAT_OFFSET);
 	}
 	
 	static drawEnd() {
-		Game.CTX.fillStyle = "red";
-		Game.CTX.fillRect(0, 0, Game.CANV.width, Game.CANV.width);
+		ctx.fillStyle = "red";
+		ctx.fillRect(0, 0, canvas.width, canvas.width);
 		
-		Game.CTX.fillStyle = "black";
-		Game.CTX.font = "100px Orbitron";
-		Game.CTX.textBaseline = "alphabetic";
+		ctx.fillStyle = "black";
+		ctx.font = "100px Orbitron";
+		ctx.textBaseline = "alphabetic";
 		let endText = "Game Over";
-		let textBox = Game.CTX.measureText(endText);
-		let textX = Game.CANV.width / 2 - textBox.width / 2;
-		let textY = Game.CANV.height / 2 + textBox.actualBoundingBoxAscent / 2;
-		Game.CTX.fillText(endText, textX, textY);
+		let textBox = ctx.measureText(endText);
+		let textX = canvas.width / 2 - textBox.width / 2;
+		let textY = canvas.height / 2 + textBox.actualBoundingBoxAscent / 2;
+		ctx.fillText(endText, textX, textY);
 	}
 }
 
@@ -99,12 +100,12 @@ export class Clickable {
 	
 	draw() {
 		if(this.rect.isPointInside(new Vector2(InputManager.curMouseX, InputManager.curMouseY)) || this.towerType == Game.state.selTowType) {
-			Game.CTX.fillStyle = "White";
+			ctx.fillStyle = "White";
 		} else {
-			Game.CTX.fillStyle = "DarkRed";
+			ctx.fillStyle = "DarkRed";
 		}
 		
-		Game.CTX.fillRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
-		Game.CTX.drawImage(this.img, this.rect.left + 3, this.rect.top + 3);
+		ctx.fillRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+		ctx.drawImage(this.img, this.rect.left + 3, this.rect.top + 3);
 	}
 }

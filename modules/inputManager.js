@@ -10,14 +10,14 @@ export class InputManager {
 	
 	
 	static init() {
-		Game.CANV.addEventListener("mousemove", (event) => {
-			let canvasRect = Game.CANV.getBoundingClientRect();
+		canvas.addEventListener("mousemove", (event) => {
+			let canvasRect = canvas.getBoundingClientRect();
 			InputManager.curMouseX = event.clientX - canvasRect.left;
 			InputManager.curMouseY = event.clientY - canvasRect.top;
 		});
 		
-		Game.CANV.addEventListener("mousedown", (event) => {
-			let canvasRect = Game.CANV.getBoundingClientRect();
+		canvas.addEventListener("mousedown", (event) => {
+			let canvasRect = canvas.getBoundingClientRect();
 			let mouseX = event.clientX - canvasRect.left;
 			let mouseY = event.clientY - canvasRect.top;
 	

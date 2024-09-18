@@ -39,7 +39,7 @@ export class HQ extends Entity {
 	}
 	
 	draw() {
-		Game.CTX.drawImage(AssetManager.HQ_SPRITE, this.rect.left, this.rect.top);
+		ctx.drawImage(AssetManager.textures["hq"], this.rect.left, this.rect.top);
 	}
 }
 
@@ -59,12 +59,12 @@ export class TowerType {
 export class Tower extends Entity {
 	static drawBlueprint(x, y, type) {
 		if(Game.state.money >= 40 && Tower.canPlace(x, y, type)) {
-			Game.CTX.fillStyle = Colors.BP;
+			ctx.fillStyle = Colors.BP;
 		} else {
-			Game.CTX.fillStyle = Colors.BP_INVALID;
+			ctx.fillStyle = Colors.BP_INVALID;
 		}
 		
-		Game.CTX.fillRect(x - type.size.x / 2, y - type.size.y / 2, type.size.x, type.size.y);
+		ctx.fillRect(x - type.size.x / 2, y - type.size.y / 2, type.size.x, type.size.y);
 	}
 	
 	static canPlace(xCenter, yCenter, tType) {
@@ -103,10 +103,10 @@ export class Tower extends Entity {
 		if(this.type == TowerType.SNIPER) {
 			let HEAD_SIZE = 32;
 			//drawing base
-			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_BASE, this.rect.left, this.rect.top);
+			ctx.drawImage(AssetManager.textures["sniper_turret_base"], this.rect.left, this.rect.top);
 			
 			//drawing head
-			Game.CTX.save();
+			ctx.save();
 			
 			let angle;
 			if(this.target != undefined) {
@@ -118,16 +118,16 @@ export class Tower extends Entity {
 			
 			
 			let center = this.rect.getCenter();
-			Game.CTX.translate(center.x, center.y);
-			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.SNIPER_TURRET_HEAD, -HEAD_SIZE / 2, -HEAD_SIZE / 2);
+			ctx.translate(center.x, center.y);
+			ctx.rotate(angle);
+			ctx.drawImage(AssetManager.textures["sniper_turret_head"], -HEAD_SIZE / 2, -HEAD_SIZE / 2);
 			
-			Game.CTX.restore();
+			ctx.restore();
 			
 		} else if(this.type == TowerType.MG) {
-			Game.CTX.drawImage(AssetManager.MG_TURRET_BASE, this.rect.left, this.rect.top);
+			ctx.drawImage(AssetManager.textures["mg_turret_base"], this.rect.left, this.rect.top);
 			
-			Game.CTX.save();
+			ctx.save();
 			
 			let angle;
 			if(this.target != undefined) {
@@ -139,16 +139,16 @@ export class Tower extends Entity {
 			
 			
 			let center = this.rect.getCenter();
-			Game.CTX.translate(center.x, center.y);
-			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.MG_TURRET_HEAD, -48 / 2, -48 / 2);
+			ctx.translate(center.x, center.y);
+			ctx.rotate(angle);
+			ctx.drawImage(AssetManager.textures["mg_turret_head"], -48 / 2, -48 / 2);
 			
-			Game.CTX.restore();
+			ctx.restore();
 		} else if(this.type == TowerType.ROCKET) {
 			//base
-			Game.CTX.drawImage(AssetManager.ROCKET_TURRET_BASE, this.rect.left, this.rect.top);
+			ctx.drawImage(AssetManager.textures["rocket_turret_base"], this.rect.left, this.rect.top);
 			//head
-			Game.CTX.save();
+			ctx.save();
 			
 			let angle;
 			if(this.target != undefined) {
@@ -159,11 +159,11 @@ export class Tower extends Entity {
 			}
 			
 			let center = this.rect.getCenter();
-			Game.CTX.translate(center.x, center.y);
-			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.ROCKET_TURRET_HEAD, -32 / 2, -32 / 2);
+			ctx.translate(center.x, center.y);
+			ctx.rotate(angle);
+			ctx.drawImage(AssetManager.textures["rocket_turret_head"], -32 / 2, -32 / 2);
 			
-			Game.CTX.restore();
+			ctx.restore();
 		} else {
 			//Unknown tower type
 			debugger;
@@ -258,20 +258,20 @@ export class Projectile extends Entity {
 	
 	draw() {
 		if(this.type == ProjectileType.BALL) {
-			Game.CTX.drawImage(AssetManager.PROJECTILE_SPRITE, this.rect.left, this.rect.top);
+			ctx.drawImage(AssetManager.textures["cannon_ball"], this.rect.left, this.rect.top);
 		}
 		else if(this.type == ProjectileType.ROCKET) {
 			
 			let angle = Math.atan2(this.vel.y, this.vel.x) + 2*Math.PI * (3/4);
 			let center = this.rect.getCenter();
 			
-			Game.CTX.save();
+			ctx.save();
 			
-			Game.CTX.translate(center.x, center.y);
-			Game.CTX.rotate(angle);
-			Game.CTX.drawImage(AssetManager.ROCKET_PROJECTILE_SPRITE, -16 / 2, -22 / 2);
+			ctx.translate(center.x, center.y);
+			ctx.rotate(angle);
+			ctx.drawImage(AssetManager.textures["rocket"], -16 / 2, -22 / 2);
 			
-			Game.CTX.restore();
+			ctx.restore();
 		} else {
 			//unknown projectile type
 			debugger;
@@ -282,8 +282,8 @@ export class Projectile extends Entity {
 		this.rect.upperLeft.x += this.vel.x;
 		this.rect.upperLeft.y += this.vel.y;
 		
-		if(this.rect.bottom < 0 || this.rect.top > Game.CANV.height ||
-			this.rect.right < 0 || this.rect.left > Game.CANV.width) {
+		if(this.rect.bottom < 0 || this.rect.top > canvas.height ||
+			this.rect.right < 0 || this.rect.left > canvas.width) {
 			Game.state.projectiles.splice(index, 1);
 		}
 		
@@ -320,32 +320,32 @@ export class Enemy extends Entity {
 	draw() {
 		
 		if(this.health / this.startHealth > 0.66) {
-			Game.CTX.fillStyle = "green";
+			ctx.fillStyle = "green";
 		} else if(this.health / this.startHealth > 0.33) {
-			Game.CTX.fillStyle = "yellow";
+			ctx.fillStyle = "yellow";
 		} else {
-			Game.CTX.fillStyle = "red";
+			ctx.fillStyle = "red";
 		}
 		
-		Game.CTX.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.type.size.x, this.type.size.y);
+		ctx.fillRect(this.rect.upperLeft.x, this.rect.upperLeft.y, this.type.size.x, this.type.size.y);
 		
 		if(this.type.isArmored) {
-			Game.CTX.fillStyle = "black";
-			Game.CTX.fillRect(this.rect.upperLeft.x + 2, this.rect.upperLeft.y + 2, this.type.size.x - 4, this.type.size.y - 4);
+			ctx.fillStyle = "black";
+			ctx.fillRect(this.rect.upperLeft.x + 2, this.rect.upperLeft.y + 2, this.type.size.x - 4, this.type.size.y - 4);
 		}
 		
 		if(this.type == EnemyType.BOSS) {
 			let healthHeigth = this.rect.bottom + 2;
 			//red
-			Game.CTX.fillStyle = "red";
-			Game.CTX.fillRect(this.rect.left, healthHeigth, this.rect.width, 2);
+			ctx.fillStyle = "red";
+			ctx.fillRect(this.rect.left, healthHeigth, this.rect.width, 2);
 			
 			//green
 			let healthPerc = this.health / this.startHealth;
 			let gBarSize = Math.ceil(healthPerc * this.rect.width);
 			
-			Game.CTX.fillStyle = "green";
-			Game.CTX.fillRect(this.rect.left, healthHeigth, gBarSize, 2);
+			ctx.fillStyle = "green";
+			ctx.fillRect(this.rect.left, healthHeigth, gBarSize, 2);
 		}
 	}
 		

@@ -63,7 +63,9 @@ class UIElement {
     mouseClick(e) {}
 
     markScreenForRedraw() {
-	ScreenManager.redraw();
+	if(ScreenManager.continueRendering === false) {
+	    ScreenManager.redraw();
+	}
     }
 
     get boundRect() {
@@ -107,7 +109,7 @@ export class UIButton extends UIElement {
     constructor(args = {}) {
 	super(args);
 	this.text = args.text;
-	this.callback = args.callback;
+	this.clickCallback = args.clickCallback;
 	
 	this.isHoveredOver = false;
 	
@@ -147,6 +149,8 @@ export class UIButton extends UIElement {
     }
 
     mouseClick(e) {
-	console.log(e);
+	if(this.boundRect.isPointInside(new Vector2(e.clientX, e.clientY))) {
+	    this.clickCallback();
+	}
     }
 }

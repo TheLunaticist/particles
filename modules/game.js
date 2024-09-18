@@ -1,29 +1,20 @@
 "use strict";
 
-import { GameStages, StartConfig, MoneyConfig, } from "./constants.js";
-import { HQ, TowerType, Tower, } from "./entity.js";
-import { WaveManager, } from "./waveManager.js";
-import { InputManager, } from "./inputManager.js";
-import { GUIManager, GUIRenderer, } from "./guiManager.js";
-import { Colors, } from "./constants.js";
+import { StartConfig, MoneyConfig } from "/m/constants.js";
+import { HQ, TowerType, Tower } from "/m/entity.js";
+import { WaveManager } from "/m/waveManager.js";
+import { InputManager } from "/m/inputManager.js";
+import { GUIManager, GUIRenderer } from "/m/guiManager.js";
+import { Colors } from "/m/constants.js";
+import { ScreenManager } from "/m/screenManager.js"; 
 
 export class Game {
-	static CANV;
-	static CTX;
-	
-	static FPS = 30;
-	static MS_PER_FRAME = 1 / Game.FPS * 1000;
-	
-	static stage = GameStages.RUNNING;
 	static state;
+	static doExit;
 	
-	static throttleFps = false;
-	
-	static init(canvas) {
-		Game.CANV = canvas;
-		Game.CTX = Game.CANV.getContext("2d");
-		
+	static init() {
 		Game.state = new GameState();
+		Game.doExit = false;
 		
 		WaveManager.init();
 		InputManager.init();
@@ -31,17 +22,9 @@ export class Game {
 	}
 	
 	static doFrame() {
-		if(Game.stage == GameStages.RUNNING) {
 			Game.state.update();
+			if(Game.doExit === true) return;
 			Game.state.draw();
-		} else {
-			GUIRenderer.drawEnd();
-		}
-		
-	}
-	
-	static toggleThrottle() {
-		Game.throttleFps = !Game.throttleFps;
 	}
 }
 
@@ -51,7 +34,7 @@ class GameState {
 		this.projectiles = [];
 		this.enemies = [];
 		this.towers = [];
-		this.hq = new HQ(Game.CANV.width / 2, Game.CANV.height / 2, true);
+		this.hq = new HQ(canvas.width / 2, canvas.height / 2, true);
 		
 		this.playerHealth = StartConfig.PLAYER_HEALTH;
 		this.moneyCooldown = MoneyConfig.COOLDOWN;
@@ -61,25 +44,25 @@ class GameState {
 	}
 	
 	draw() {
-		//background
-		Game.CTX.fillStyle = Colors.BACKGROUND;
-		Game.CTX.fillRect(0, 0, Game.CANV.width, Game.CANV.height);
-		
-		this.hq.draw();
-		
-		this.towers.forEach(tower => {
-			tower.draw();
-		});
-		
-		this.enemies.forEach(enemy => {
-			enemy.draw();
-		});
-		
-		this.projectiles.forEach(projectile => {
-			projectile.draw();
-		});
-		
-		GUIManager.draw();
+	    //background
+	    ctx.fillStyle = Colors.BACKGROUND;
+	    ctx.fillRect(0, 0, canvas.width, canvas.height);
+	    
+	    this.hq.draw();
+	    
+	    this.towers.forEach(tower => {
+		    tower.draw();
+	    });
+	    
+	    this.enemies.forEach(enemy => {
+		    enemy.draw();
+	    });
+	    
+	    this.projectiles.forEach(projectile => {
+		    projectile.draw();
+	    });
+	    
+	    GUIManager.draw();
 	}
 	
 	update() {	
@@ -109,7 +92,8 @@ class GameState {
 			if(this.enemies[i].doesEntityCollideWith(this.hq)) {
 				this.playerHealth -= 10;
 				if(this.playerHealth <= 0) {
-					Game.stage = GameStages.OVER;
+					ScreenManager.setActiveScreen(ScreenManager.END_SCREEN);
+					Game.doExit = true;
 				}
 			
 				this.enemies.splice(i, 1);

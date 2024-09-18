@@ -1,8 +1,9 @@
 "use strict";
 
-import { StartScreen } from "./screen.js";
+import { StartScreen, GameScreen, EndScreen } from "./screen.js";
 
 export class ScreenManager {
+    static halveFps;
     static continueRendering = false;
     static evenFrame = true;
     static lastAnimationFrame = undefined;
@@ -11,21 +12,22 @@ export class ScreenManager {
 
     //screens
     static START_SCREEN;
-    static GAME_SCREEN = undefined;
+    static GAME_SCREEN;
+    static END_SCREEN;
 
     static activeScreen = null;
 
     static setActiveScreen(screen) {
 	ScreenManager.activeScreen?.close();
 
-	ScreenManager.activeScreen = screen;
-	screen.open();
-	screen.draw();
-
 	//cancelling old animation frame
 	if(ScreenManager.lastAnimationFrame !== undefined) {
-	    window.cancelAnimationFrame(lastAnimationFrame);
+	    window.cancelAnimationFrame(ScreenManager.lastAnimationFrame);
 	}
+
+	ScreenManager.activeScreen = screen;
+	screen.open();
+
 
 	ScreenManager.continueRendering = screen.liveRendering;
 	if(screen.liveRendering === true) {
@@ -35,7 +37,8 @@ export class ScreenManager {
 
     static init() {
 	ScreenManager.START_SCREEN = new StartScreen();
-	ScreenManager.GAME_SCREEN = new StartScreen(); //TODO: remove
+	ScreenManager.GAME_SCREEN = new GameScreen();
+	ScreenManager.END_SCREEN = new EndScreen();
 
 	window.addEventListener("resize", (e) => {
 	    let clientRect = canvas.getClientRects()[0];
@@ -58,12 +61,14 @@ export class ScreenManager {
 	canvas.addEventListener("mouseup", (e) => {
 	    this.activeScreen?.mouseClick(e);
 	});	
+
+	ScreenManager.determineFps();
     }
 
     static renderLoop() {
 	ScreenManager.evenFrame = !ScreenManager.evenFrame;
 	if(!ScreenManager.evenFrame) {
-	    //draw
+	    ScreenManager.activeScreen.draw();
 	}
 
 	if(ScreenManager.continueRendering) ScreenManager.lastAnimationFrame = window.requestAnimationFrame(ScreenManager.renderLoop);
@@ -72,6 +77,21 @@ export class ScreenManager {
     static redraw() {
 	ScreenManager.markForRedraw = true;
     }
+
+    static async determineFps() {
+	await new Promise((resolve) => {
+	    requestAnimationFrame(resolve);
+	});
+	let timeA = Date.now();
+
+	await new Promise((resolve) => {
+	    requestAnimationFrame(resolve);
+	});
+
+	console.log(Date.now() - timeA);
+    }
+
+
 }
 
 ScreenManager.init();

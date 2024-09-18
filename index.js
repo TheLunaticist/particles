@@ -9,7 +9,7 @@ import { ScreenManager } from "./m/screenManager.js";
 window.ctx = window.canvas.getContext("2d");
 
 function startGame() {
-    Game.init(document.getElementById("canvas"));
+    Game.init();
     ScreenManager.setActiveScreen(ScreenManager.START_SCREEN);
 }
 

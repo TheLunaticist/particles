@@ -4,7 +4,6 @@ export class Vector2 {
 	constructor(x, y) {
 		if(typeof(x) != "number" || typeof(y) != "number") {
 			let err = new Error();
-			console.log(err.stack);
 			debugger;
 		}
 		this.x = x;

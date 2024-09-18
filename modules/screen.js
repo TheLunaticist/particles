@@ -1,5 +1,7 @@
-import { UIText, HorizontalAnchor, VerticalAnchor, UIButton, } from "./uiElement.js";
-import { Vector2 } from "./vector2.js";
+import { UIText, HorizontalAnchor, VerticalAnchor, UIButton, } from "/m/uiElement.js";
+import { Vector2 } from "/m/vector2.js";
+import { ScreenManager } from "/m/screenManager.js";
+import { Game } from "/m/game.js";
 
 class Screen {
     constructor(liveRendering) {
@@ -38,7 +40,7 @@ export class StartScreen extends Screen {
 		anchorHorizontal: HorizontalAnchor.MIDDLE,
 		offset: new Vector2(0, 0),
 		size: new Vector2(0, 96),
-		text: "Particles",
+		text: "Particles"
 	    })
 	);
 	this.uiElements.push(
@@ -48,6 +50,9 @@ export class StartScreen extends Screen {
 		offset: new Vector2(0, 48 + 32),
 		size: new Vector2(0, 64),
 		text: "Play",
+		clickCallback: () => {
+		    ScreenManager.setActiveScreen(ScreenManager.GAME_SCREEN);
+		}
 	    })
 	)
     }
@@ -62,4 +67,57 @@ export class StartScreen extends Screen {
 	this.draw();
     }
 }
+
+export class EndScreen extends Screen {
+    constructor() {
+	super(false);
+	this.uiElements.push(
+	    UIText.new({
+		anchorVertical: VerticalAnchor.MIDDLE,
+		anchorHorizontal: HorizontalAnchor.MIDDLE,
+		offset: new Vector2(0, 0),
+		size: new Vector2(0, 96),
+		text: "Game Over"
+	    })
+	);
+	this.uiElements.push(
+	    UIButton.new({
+		anchorVertical: VerticalAnchor.MIDDLE,
+		anchorHorizontal: HorizontalAnchor.MIDDLE,
+		offset: new Vector2(0, 48 + 32),
+		size: new Vector2(0, 64),
+		text: "Retry",
+		clickCallback: () => {
+		    ScreenManager.setActiveScreen(ScreenManager.GAME_SCREEN);
+		}
+	    })
+	)
+    }
+
+    draw() {
+	ctx.fillStyle = "black";
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	super.draw();
+	window.done = true;
+    }
+
+    open() {
+	this.draw();
+    }
+}
 	
+export class GameScreen extends Screen {
+    constructor() {
+	super(true);
+    }
+
+    open() {
+	Game.init();
+    }
+
+    draw() {
+	Game.doFrame();
+    }
+}
+
+
