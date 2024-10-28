@@ -1,58 +1,70 @@
 "use strict";
 
-import { Vector2 } from "./vector2.js";
+import { Vec2 } from "/m/vector2.js";
+import { typeAssert } from "/m/debug.js";
 
-export class Rectangle {
-	constructor(x, y, width, height) {
-		this.upperLeft = new Vector2(x, y);
-		this.size = new Vector2(width, height);
-	}
+export class Rect {
+    static fromVectors(vA, vB) {
+        return new Rect(vA.x, vA.y, vB.x, vB.y);
+    }
 
-	static fromVectors(vA, vB) {
-	    return new Rectangle(vA.x, vA.y, vB.x, vB.y);
-	}
-	
-	getCenter() {
-		return new Vector2(this.upperLeft.x + this.size.x / 2, this.upperLeft.y + this.size.y / 2);
-	}
-	
-	intersects(otherRect) {
-		if(this.left > otherRect.right || this.right < otherRect.left) {
-			return false;
-		}
-		
-		if(this.top > otherRect.bottom || this.bottom < otherRect.top) {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	isPointInside(pos) {
-		return pos.x > this.left && pos.x < this.right && pos.y > this.top && pos.y < this.bottom;
-	}
-	
-	get left() {
-		return this.upperLeft.x;
-	}
-	
-	get right() {
-		return this.upperLeft.x + this.size.x;
-	}
-	
-	get top() {
-		return this.upperLeft.y;
-	}
-	
-	get bottom() {
-		return this.upperLeft.y + this.size.y;
-	}
-	
-	get width() {
-		return this.size.x;
-	}
-	
-	get height() {
-		return this.size.y;
-	}
+    constructor(x, y, w, h) {
+        typeAssert(x, "number");
+        this.x = x;
+        typeAssert(y, "number");
+        this.y = y;
+        typeAssert(w, "number");
+        this.w = w;
+        typeAssert(h, "number");
+        this.h = h;
+    }
+
+    getCenter() {
+        return new Vec2(this.x + this.w / 2, this.y + this.h / 2);
+    }
+
+    intersects(otherRect) {
+        if (this.left > otherRect.right || this.right < otherRect.left) {
+            return false;
+        }
+
+        if (this.top > otherRect.bottom || this.bottom < otherRect.top) {
+            return false;
+        }
+
+        return true;
+    }
+
+    isPointInside(point) {
+        return (
+            point.x > this.left &&
+            point.x < this.right &&
+            point.y > this.top &&
+            point.y < this.bottom
+        );
+    }
+
+    get left() {
+        return this.x;
+    }
+
+    get right() {
+        return this.x + this.w;
+    }
+
+    get top() {
+        return this.y;
+    }
+
+    get bottom() {
+        return this.y + this.h;
+    }
+
+    get width() {
+        return this.w;
+    }
+
+    get height() {
+        return this.h;
+    }
 }
