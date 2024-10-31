@@ -1,9 +1,9 @@
 "use strict";
 
-import { Rect } from "./rectangle.js";
-import { Vec2 } from "./vector2.js";
-import { ScreenManager } from "/m/screenManager.js";
-import { canvas, ctx } from "/m/graphics.js";
+import { Rect } from "modules/rectangle.js";
+import { Vec2 } from "modules/vector2.js";
+import { ScreenManager } from "modules/screenManager.js";
+import { canvas, ctx } from "modules/graphics.js";
 
 export class HorizontalAnchor {
     static LEFT = "LEFT";
