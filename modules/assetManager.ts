@@ -1,6 +1,6 @@
 "use strict";
 
-import { LoggableError } from "/m/debug.js";
+import { LoggableError } from "modules/debug.js";
 
 export class AssetManager {
     static TEXTURE_PATH = ".\\assets\\textures\\";
@@ -9,7 +9,7 @@ export class AssetManager {
     static textureNumber = 0;
 
     static async load() {
-        let promises = [];
+        const promises: any = [];
 
         //textures
         const loadTexture = AssetManager.loadTexture;
@@ -36,8 +36,8 @@ export class AssetManager {
             promises,
         );
 
-        let results = await Promise.allSettled(promises);
-        let rejectReasons = [];
+        const results = await Promise.allSettled(promises);
+        const rejectReasons: any[] = [];
         results.forEach((result) => {
             if (result.status !== "fulfilled") {
                 rejectReasons.push(result.reason);
@@ -51,9 +51,9 @@ export class AssetManager {
         }
     }
 
-    static loadTexture(name, promiseCollector) {
+    static loadTexture(name: string, promiseCollector: []) {
         AssetManager.textureNumber += 1;
-        let image = new Image();
+        const image = new Image();
         AssetManager.textures[name] = image;
 
         promiseCollector.push(

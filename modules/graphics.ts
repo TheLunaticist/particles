@@ -1,5 +1,5 @@
-import { instanceAssert } from "/m/debug.js";
-import { Vec2 } from "/m/vector2.js";
+import { instanceAssert } from "modules/debug.js";
+import { Vec2 } from "modules/vector2.js";
 
 export const canvas = document.getElementById("canvas");
 export const ctx = canvas.getContext("2d", { alpha: true, antialias: false });

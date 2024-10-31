@@ -3,11 +3,11 @@ import {
     HorizontalAnchor,
     VerticalAnchor,
     UIButton,
-} from "/m/uiElement.js";
-import { Vec2 } from "/m/vector2.js";
-import { ScreenManager } from "/m/screenManager.js";
-import { Game } from "/m/game.js";
-import { canvas, ctx } from "/m/graphics.js";
+} from "modules/uiElement.js";
+import { Vec2 } from "modules/vector2.js";
+import { ScreenManager } from "modules/screenManager.js";
+import { Game } from "modules/game.js";
+import { canvas, ctx } from "modules/graphics.js";
 
 class Screen {
     constructor(liveRendering) {
