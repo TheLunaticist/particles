@@ -1,30 +1,36 @@
 "use strict";
 
-import { typeAssert, instanceAssert } from "modules/debug.js";
-
 //isValid
 export class Vec2 {
-    static add(vectorA, vectorB) {
-        instanceAssert(vectorA, Vec2);
-        instanceAssert(vectorB, Vec2);
-        return new Vec2(vectorA.x + vectorB.x, vectorA.y + vectorB.y);
+    constructor(
+        public x: number,
+        public y: number,
+    ) {}
+
+    static add(a: Vec2, b: Vec2): Vec2 {
+        return new Vec2(a.x + b.x, a.y + b.y);
     }
 
-    static subtract(vectorA, vectorB) {
-        return new Vec2(vectorA.x - vectorB.x, vectorA.y - vectorB.y);
+    static subtract(a: Vec2, b: Vec2): Vec2 {
+        return new Vec2(a.x - b.x, a.y - b.y);
     }
 
-    static scaleVec(vector, scale) {
-        return new Vec2(vector.x * scale, vector.y * scale);
+    static scaleVec(v: Vec2, scale: number) {
+        return new Vec2(v.x * scale, v.y * scale);
     }
 
-    static getRandomUnitVec() {
+    static getRandomUnitVec(): Vec2 {
         let vecAsRad = Math.random() * 2 * Math.PI;
         return new Vec2(Math.cos(vecAsRad), Math.sin(vecAsRad));
     }
 
-    static doVectorSquaresIntersect(posA, sizeA, posB, sizeB) {
-        if (posA.x > posB.x + sizeB.x || posA.x + sizeA.x < sizeB) {
+    static doVectorSquaresIntersect(
+        posA: Vec2,
+        sizeA: Vec2,
+        posB: Vec2,
+        sizeB: Vec2,
+    ): boolean {
+        if (posA.x > posB.x + sizeB.x || posA.x + sizeA.x < sizeB.x) {
             return false;
         }
 
@@ -35,35 +41,28 @@ export class Vec2 {
         return true;
     }
 
-    constructor(x, y) {
-        typeAssert(x, "number");
-        this.x = x;
-        typeAssert(y, "number");
-        this.y = y;
-    }
 
-    get length() {
+    get length(): number {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
-    getNormalized() {
-        let length = this.length;
-        return new Vec2(this.x / length, this.y / length);
+    getNormalized(): Vec2 {
+        return new Vec2(this.x / this.length, this.y / this.length);
     }
 
     normalize() {
-	let length = this.length;
-	this.x /= length;
-	this.y /= length;
+		let length = this.length;
+        this.x /= length;
+        this.y /= length;
     }
 
-    scale(scalar) {
-	this.x *= scalar;
-	this.y *= scalar;
+    scale(scalar: number) {
+        this.x *= scalar;
+        this.y *= scalar;
     }
 
-    add(vec) {
-	this.x += vec.x;
-	this.y += vec.y;
+    add(vec: Vec2) {
+        this.x += vec.x;
+        this.y += vec.y;
     }
 }

@@ -1,5 +1,5 @@
 export class LoggableError extends Error {
-    constructor(message) {
+    constructor(message: string) {
         super(message);
         this.name = this.constructor.name;
     }
@@ -37,14 +37,14 @@ export class CalledVirtualFunctionError extends Error {
     }
 }
 
-export function assert(value) {
+export function assert(value: boolean) {
     if (value !== true) throw new AssertionFailedError();
 }
 
-export function typeAssert(value, type) {
+export function typeAssert(value: any, type: string) {
     if (typeof value !== type) throw new TypeAssertionFailedError();
 }
 
-export function instanceAssert(value, type) {
+export function instanceAssert(value: any, type: Function) {
     if (!(value instanceof type)) throw new InstanceAssertionFailedError();
 }

@@ -4,26 +4,23 @@ import { Vec2 } from "modules/vector2.js";
 import { typeAssert } from "modules/debug.js";
 
 export class Rect {
-    static fromVectors(vA, vB) {
-        return new Rect(vA.x, vA.y, vB.x, vB.y);
+    constructor(
+        public x: number,
+        public y: number,
+        public w: number,
+        public h: number,
+    ) {}
+
+    static fromVectors(a: Vec2, b: Vec2) {
+        return new Rect(a.x, a.y, b.x, b.y);
     }
 
-    constructor(x, y, w, h) {
-        typeAssert(x, "number");
-        this.x = x;
-        typeAssert(y, "number");
-        this.y = y;
-        typeAssert(w, "number");
-        this.w = w;
-        typeAssert(h, "number");
-        this.h = h;
-    }
 
     getCenter() {
         return new Vec2(this.x + this.w / 2, this.y + this.h / 2);
     }
 
-    intersects(otherRect) {
+    intersects(otherRect: Rect) {
         if (this.left > otherRect.right || this.right < otherRect.left) {
             return false;
         }
@@ -35,7 +32,7 @@ export class Rect {
         return true;
     }
 
-    isPointInside(point) {
+    isPointInside(point: Vec2) {
         return (
             point.x > this.left &&
             point.x < this.right &&

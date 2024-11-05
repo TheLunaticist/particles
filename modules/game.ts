@@ -1,20 +1,12 @@
 "use strict";
 
-import { typeAssert, instanceAssert } from "modules/debug.js";
-import {
-    Building,
-    BuildingType,
-    Enemy,
-    EnemyType,
-    EntityList,
-} from "modules/entity.js";
 import { Vec2 } from "modules/vector2.js";
 import { LevelDescriptor, Level } from "modules/level.js";
 
 export class Game {
-    static level = null;
+    static level: Level | null = null;
 
-    static clickEvent(event) {}
+    static clickEvent(_: MouseEvent) {}
 
     static doFrame() {
         if (Game.level === null) {
@@ -27,17 +19,10 @@ export class Game {
 
     static init() {
         //TODO: add different levels and difficulties
-        Game.loadLevel(
-            new LevelDescriptor({
-                color: "black",
-                safeBuildRadius: 100,
-                size: new Vec2(2000, 2000),
-            }),
-        );
+        Game.loadLevel(new LevelDescriptor("black", 100, new Vec2(2000, 2000)));
     }
 
-    static loadLevel(levelDescriptor) {
-        instanceAssert(levelDescriptor, LevelDescriptor);
+    static loadLevel(levelDescriptor: LevelDescriptor) {
         Game.level = new Level(levelDescriptor);
     }
 }

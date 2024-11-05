@@ -1,28 +1,27 @@
 "use strict";
 
-import { StartScreen, GameScreen, EndScreen } from "modules/screen.js";
-import { canvas, ctx } from "modules/graphics.js";
+import { Screen, StartScreen, GameScreen, EndScreen } from "modules/screen.js";
+import { canvas } from "modules/graphics.js";
 
 export class ScreenManager {
-    static halveFps;
+    static halveFps: boolean;
     static continueRendering = false;
     static evenFrame = true;
-    static lastAnimationFrame = undefined;
+    static lastAnimationFrame: number | null = null;
 
-    static markForRedraw = false;
+    static markedForRedraw = false;
 
     //screens
-    static START_SCREEN;
-    static GAME_SCREEN;
-    static END_SCREEN;
+    static START_SCREEN: Screen;
+    static GAME_SCREEN: Screen;
+    static END_SCREEN: Screen;
 
-    static activeScreen = null;
+    static activeScreen: Screen | null = null;
 
-    static setActiveScreen(screen) {
-        ScreenManager.activeScreen?.close();
-
+    static setActiveScreen(screen: Screen) {
+        this.activeScreen?.close();
         //cancelling old animation frame
-        if (ScreenManager.lastAnimationFrame !== undefined) {
+        if (ScreenManager.lastAnimationFrame !== null) {
             window.cancelAnimationFrame(ScreenManager.lastAnimationFrame);
         }
 
@@ -42,21 +41,19 @@ export class ScreenManager {
         ScreenManager.GAME_SCREEN = new GameScreen();
         ScreenManager.END_SCREEN = new EndScreen();
 
-        window.addEventListener("resize", (e) => {
+        window.addEventListener("resize", (_: UIEvent) => {
             let clientRect = canvas.getClientRects()[0];
             canvas.width = clientRect.width;
             canvas.height = clientRect.height;
-            ScreenManager.activeScreen.draw();
+            ScreenManager.activeScreen?.draw();
         });
 
         canvas.addEventListener("mousemove", (e) => {
-            if (ScreenManager.activeScreen !== null) {
-                ScreenManager.activeScreen.mouseMove(e);
-            }
+            ScreenManager.activeScreen?.mouseMove(e);
 
-            if (ScreenManager.markForRedraw) {
-                ScreenManager.activeScreen.draw();
-                ScreenManager.markForRedraw = false;
+            if (ScreenManager.markedForRedraw) {
+                ScreenManager.activeScreen!.draw();
+                ScreenManager.markedForRedraw = false;
             }
         });
 
@@ -68,7 +65,7 @@ export class ScreenManager {
     static renderLoop() {
         ScreenManager.evenFrame = !ScreenManager.evenFrame;
         if (!ScreenManager.evenFrame) {
-            ScreenManager.activeScreen.draw();
+			ScreenManager.activeScreen?.draw();
         }
 
         if (ScreenManager.continueRendering)
@@ -77,8 +74,8 @@ export class ScreenManager {
             );
     }
 
-    static redraw() {
-        ScreenManager.markForRedraw = true;
+    static markForRedraw() {
+        ScreenManager.markedForRedraw = true;
     }
 }
 

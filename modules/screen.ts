@@ -1,19 +1,18 @@
 import {
     UIText,
-    HorizontalAnchor,
-    VerticalAnchor,
+    HorizontalAnchorPoint,
+    VerticalAnchorPoint,
     UIButton,
+    UIElement,
 } from "modules/uiElement.js";
 import { Vec2 } from "modules/vector2.js";
 import { ScreenManager } from "modules/screenManager.js";
 import { Game } from "modules/game.js";
 import { canvas, ctx } from "modules/graphics.js";
 
-class Screen {
-    constructor(liveRendering) {
-        this.liveRendering = liveRendering;
-        this.uiElements = [];
-    }
+export class Screen {
+    uiElements: UIElement[] = [];
+    constructor(public liveRendering: boolean) {}
 
     draw() {
         this.uiElements.forEach((e) => {
@@ -23,13 +22,13 @@ class Screen {
 
     open() {}
     close() {}
-    mouseMove(e) {
+    mouseMove(e: MouseEvent) {
         this.uiElements.forEach((element) => {
             element.mouseMove(e);
         });
     }
 
-    mouseClick(event) {
+    mouseClick(event: MouseEvent): boolean {
         return this.uiElements.every((element) => {
             return !(element.mouseClick(event) === false);
         });
@@ -41,8 +40,8 @@ export class StartScreen extends Screen {
         super(false);
         this.uiElements.push(
             UIText.new({
-                anchorVertical: VerticalAnchor.MIDDLE,
-                anchorHorizontal: HorizontalAnchor.MIDDLE,
+                vertical: VerticalAnchorPoint.MIDDLE,
+                horizontal: HorizontalAnchorPoint.MIDDLE,
                 offset: new Vec2(0, 0),
                 size: new Vec2(0, 96),
                 text: "Particles",
@@ -50,8 +49,8 @@ export class StartScreen extends Screen {
         );
         this.uiElements.push(
             UIButton.new({
-                anchorVertical: VerticalAnchor.MIDDLE,
-                anchorHorizontal: HorizontalAnchor.MIDDLE,
+                vertical: VerticalAnchorPoint.MIDDLE,
+                horizontal: HorizontalAnchorPoint.MIDDLE,
                 offset: new Vec2(0, 48 + 32),
                 size: new Vec2(0, 64),
                 text: "Play",
@@ -78,8 +77,8 @@ export class EndScreen extends Screen {
         super(false);
         this.uiElements.push(
             UIText.new({
-                anchorVertical: VerticalAnchor.MIDDLE,
-                anchorHorizontal: HorizontalAnchor.MIDDLE,
+                vertical: VerticalAnchorPoint.MIDDLE,
+                horizontal: HorizontalAnchorPoint.MIDDLE,
                 offset: new Vec2(0, 0),
                 size: new Vec2(0, 96),
                 text: "Game Over",
@@ -87,8 +86,8 @@ export class EndScreen extends Screen {
         );
         this.uiElements.push(
             UIButton.new({
-                anchorVertical: VerticalAnchor.MIDDLE,
-                anchorHorizontal: HorizontalAnchor.MIDDLE,
+                vertical: VerticalAnchorPoint.MIDDLE,
+                horizontal: HorizontalAnchorPoint.MIDDLE,
                 offset: new Vec2(0, 48 + 32),
                 size: new Vec2(0, 64),
                 text: "Retry",
@@ -103,7 +102,6 @@ export class EndScreen extends Screen {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         super.draw();
-        window.done = true;
     }
 
     open() {
@@ -124,8 +122,10 @@ export class GameScreen extends Screen {
         Game.doFrame();
     }
 
-    mouseClick(event) {
+    mouseClick(e: MouseEvent): boolean {
         //forwarding mouse click only if it isn't captured by other ui elements
-        if (!super.mouseClick()) Game.mouseClick(event);
+        let value = super.mouseClick(e);
+        if (!value) Game.clickEvent(e);
+        return value;
     }
 }

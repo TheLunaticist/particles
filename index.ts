@@ -1,17 +1,14 @@
 "use strict";
 
-import { AssetManager, LoadAssetError } from "modules/assetManager.js";
+import { loadFont, finishLoading } from "modules/assetManagement.js";
 import { ScreenManager } from "modules/screenManager.js";
 
-//loading
 try {
-    await AssetManager.load();
+	loadFont("Orbitron", "Orbitron-Regular.ttf") //loading font for everyone
+	await finishLoading()
+	ScreenManager.setActiveScreen(ScreenManager.START_SCREEN);
 } catch (error) {
-    if (error instanceof LoadAssetError) {
-        error.log();
-    } else {
-        throw error;
-    }
+	//TODO properly handle error 
+	console.log("error happened but wasn't handled")
+	throw error;
 }
-
-ScreenManager.setActiveScreen(ScreenManager.START_SCREEN);

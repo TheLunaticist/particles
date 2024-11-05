@@ -4,69 +4,83 @@ import { Rect } from "modules/rectangle.js";
 import { Vec2 } from "modules/vector2.js";
 import { ScreenManager } from "modules/screenManager.js";
 import { canvas, ctx } from "modules/graphics.js";
+import { CalledVirtualFunctionError } from "modules/debug.js";
 
-export class HorizontalAnchor {
-    static LEFT = "LEFT";
-    static MIDDLE = "MIDDLE";
-    static RIGHT = "RIGHT";
+export enum HorizontalAnchorPoint {
+    LEFT,
+    MIDDLE,
+    RIGHT,
 }
 
-export class VerticalAnchor {
-    static TOP = "TOP";
-    static MIDDLE = "MIDDLE";
-    static BOTTOM = "BOTTOM";
+export enum VerticalAnchorPoint {
+    TOP,
+    MIDDLE,
+    BOTTOM,
 }
 
-class UIElement {
-    constructor(args) {
-        this.anchorVertical = args.anchorVertical;
-        this.anchorHorizontal = args.anchorHorizontal;
-        this.offset = args.offset;
-        this.size = args.size;
+export interface UIELementArgs {
+    horizontal: HorizontalAnchorPoint;
+    vertical: VerticalAnchorPoint;
+    offset: Vec2;
+    size: Vec2;
+}
+export abstract class UIElement {
+    horizontal: HorizontalAnchorPoint;
+    vertical: VerticalAnchorPoint;
+    offset: Vec2;
+    size: Vec2;
+    constructor(args: UIELementArgs) {
+		this.horizontal = args.horizontal;
+		this.vertical = args.vertical;
+		this.offset = args.offset;
+		this.size = args.size;
+		
+	}
+
+    getAnchorVertical(): number {
+		switch (this.vertical) {
+			case VerticalAnchorPoint.TOP:
+				return 0;
+			case VerticalAnchorPoint.MIDDLE:
+				return canvas.height / 2;
+			case VerticalAnchorPoint.BOTTOM:
+				return canvas.height;
+		}
     }
 
-    getAnchorVertical() {
-        if (this.anchorVertical === VerticalAnchor.LEFT) {
-            return 0;
-        } else if (this.anchorVertical === VerticalAnchor.MIDDLE) {
-            return canvas.height / 2;
-        } else if (this.anchorVertical === VerticalAnchor.RIGHT) {
-            return canvas.height;
-        } else {
-            debugger;
-        }
+    getAnchorHorizontal(): number {
+		switch (this.horizontal) {
+			case HorizontalAnchorPoint.LEFT:
+				return 0;
+			case HorizontalAnchorPoint.MIDDLE:
+				return canvas.width / 2;
+			case HorizontalAnchorPoint.RIGHT:
+				return canvas.width;
+		}
     }
 
-    getAnchorHorizontal() {
-        if (this.anchorHorizontal === HorizontalAnchor.TOP) {
-            return 0;
-        } else if (this.anchorHorizontal === HorizontalAnchor.MIDDLE) {
-            return canvas.width / 2;
-        } else if (this.anchorHorizontal === HorizontalAnchor.BOTTOM) {
-            return canvas.width;
-        } else {
-            debugger;
-        }
-    }
-
-    get centerX() {
+    get centerX(): number {
         return this.getAnchorHorizontal() + this.offset.x;
     }
 
-    get centerY() {
+    get centerY(): number {
         return this.getAnchorVertical() + this.offset.y;
     }
 
-    draw() {}
+    draw() {
+		throw new CalledVirtualFunctionError()
+	}
 
-    mouseMove(e) {}
+    mouseMove(_: MouseEvent) {}
 
     //return false to mark click as captured
-    mouseClick(e) {}
+    mouseClick(_: MouseEvent): boolean {
+		return true;
+	}
 
     markScreenForRedraw() {
         if (ScreenManager.continueRendering === false) {
-            ScreenManager.redraw();
+            ScreenManager.markForRedraw();
         }
     }
 
@@ -80,12 +94,16 @@ class UIElement {
     }
 }
 
-export class UIText extends UIElement {
-    static new(args) {
-        return new UIText(args);
-    }
+export interface UITextArgs extends UIELementArgs {
+	text: string,
+}
 
-    constructor(args = {}) {
+export class UIText extends UIElement {
+	text: string;
+	static new(args: UITextArgs): UIText {
+		return new UIText(args);
+	}
+    constructor(args: UITextArgs) {
         super(args);
         this.text = args.text;
 
@@ -111,19 +129,25 @@ export class UIText extends UIElement {
     }
 }
 
+export interface UIButtonArgs extends UIELementArgs {
+	text: string,
+	clickCallback: (e: MouseEvent) => void,
+}
+
 export class UIButton extends UIElement {
-    static new(args) {
+	text: string;
+	isHoveredOver: boolean = false;
+	clickCallback: (e: MouseEvent) => void;
+
+    static new(args: UIButtonArgs) {
         return new UIButton(args);
     }
 
-    constructor(args = {}) {
+    constructor(args: UIButtonArgs) {
         super(args);
         this.text = args.text;
         this.clickCallback = args.clickCallback;
 
-        this.isHoveredOver = false;
-
-        let ctx = window.canvas.getContext("2d");
         ctx.font = this.size.y.toString() + "px orbitron";
         ctx.textBaseline = "bottom";
         let textMetrics = ctx.measureText(this.text);
@@ -136,7 +160,6 @@ export class UIButton extends UIElement {
         ctx.font = this.size.y.toString() + "px orbitron";
         ctx.textBaseline = "bottom";
         let textMetrics = ctx.measureText(this.text);
-        let textWidth = textMetrics.width;
         let textHeight = textMetrics.emHeightAscent;
         ctx.fillStyle = this.isHoveredOver ? "white" : "red";
         ctx.fillText(
@@ -146,7 +169,7 @@ export class UIButton extends UIElement {
         );
     }
 
-    mouseMove(e) {
+    mouseMove(e: MouseEvent) {
         let buttonRect = this.boundRect;
         let mousePos = new Vec2(e.clientX, e.clientY);
         if (this.isHoveredOver === false) {
@@ -162,17 +185,22 @@ export class UIButton extends UIElement {
         }
     }
 
-    mouseClick(e) {
+    mouseClick(e: MouseEvent): boolean {
         if (this.boundRect.isPointInside(new Vec2(e.clientX, e.clientY))) {
-            this.clickCallback();
+			this.clickCallback(e)
             return false;
         }
+		return true;
     }
 }
 
+export interface UIIconButton extends UIELementArgs {
+	icon: HTMLOrSVGImageElement,
+}
 export class UIIconButton extends UIButton {
-    constructor(args) {
+    constructor(args: UIIconButton) {
         super(args);
         this.icon = args.icon;
+		//TODO
     }
 }
