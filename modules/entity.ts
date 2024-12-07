@@ -1,6 +1,6 @@
 "use strict";
 
-import { Camera } from "modules/graphics.js";
+import { Viewport } from "modules/graphics.js";
 import { Vec2 } from "modules/vector2.js";
 import { loadTexture } from "modules/assetManagement.js";
 import { CollisionMap } from "modules/physics.js";
@@ -16,13 +16,29 @@ export abstract class Entity {
     constructor(
         public pos: Vec2,
         public type: Type,
+        public dead: boolean,
     ) {}
-    draw(_: Camera): void {}
+
+    draw(_: Viewport): void {}
     update(): void {}
 
-	get center(): Vec2 {
-		return new Vec2(this.pos.x + this.type.size.x / 2, this.pos.y + this.type.size.y / 2);
-	}
+    get center(): Vec2 {
+        return new Vec2(
+            this.pos.x + this.type.size.x / 2,
+            this.pos.y + this.type.size.y / 2,
+        );
+    }
+
+    collidesWith(e: Entity) {
+        return Vec2.doVectorSquaresIntersect(
+            this.pos,
+            this.type.size,
+            e.pos,
+            e.type.size,
+        );
+    }
+
+    doCollision(oEntity: Entity) {}
 }
 
 export class BuildingType extends Type {
@@ -33,7 +49,7 @@ export class BuildingType extends Type {
         super(size);
     }
 
-    draw(build: Building, cam: Camera) {
+    draw(build: Building, cam: Viewport) {
         switch (this) {
             case BuildingType.HQ:
                 cam.drawImage(BuildingType.HQ_TEX, build.pos.x, build.pos.y);
@@ -45,11 +61,17 @@ export class BuildingType extends Type {
 }
 
 export class Building extends Entity {
-    constructor(pos: Vec2, type: BuildingType) {
-        super(pos, type);
+	static newFromCenter(centerPos: Vec2, type: BuildingType, dead: boolean): Building {
+		centerPos.x -= type.size.x / 2;
+		centerPos.y -= type.size.y / 2;
+		return new Building(centerPos, type, dead);
+	}
+
+    constructor(pos: Vec2, type: BuildingType, dead: boolean) {
+        super(pos, type, dead);
     }
 
-    draw(cam: Camera) {
+    draw(cam: Viewport) {
         (this.type as BuildingType).draw(this, cam);
     }
 }
@@ -70,8 +92,8 @@ class TowerType extends BuildingType {
 }
 
 export class Tower extends Entity {
-    constructor(pos: Vec2, type: TowerType) {
-        super(pos, type);
+    constructor(pos: Vec2, type: TowerType, dead: boolean) {
+        super(pos, type, dead);
     }
 
     draw() {}
@@ -91,10 +113,11 @@ export class Projectile extends Entity {
     constructor(
         pos: Vec2,
         type: ProjectileType,
+        dead: boolean,
         public vel: Vec2,
         public damage: number,
     ) {
-        super(pos, type);
+        super(pos, type, dead);
     }
 
     draw() {}
@@ -122,17 +145,14 @@ export class Enemy extends Entity {
     static SPEED = 1;
 
     target: Entity | null = null;
-	health: number;
+    health: number;
 
-    constructor(
-        pos: Vec2,
-        type: EnemyType,
-    ) {
-        super(pos, type);
+    constructor(pos: Vec2, type: EnemyType, dead: boolean) {
+        super(pos, type, dead);
         this.health = type.maxHealth;
     }
 
-    draw(cam: Camera) {
+    draw(cam: Viewport) {
         cam.fillRect(
             this.pos.x,
             this.pos.y,
@@ -149,20 +169,20 @@ export class Enemy extends Entity {
 
         if (this.target !== null) {
             let dir = Vec2.subtract(this.target.center, this.center);
-			if(dir.length > 0.3) {
-				dir.normalize();
-				dir.scale(Enemy.SPEED);
-				this.pos.add(dir);
-			}
+            if (dir.length > 0.3) {
+                dir.normalize();
+                dir.scale(Enemy.SPEED);
+                this.pos.add(dir);
+            }
         }
     }
 
     findTarget() {
-        this.target = Game.level?.buildings[0];
+        this.target = Game.level?.buildings[0] as Entity;
     }
 }
 
-export class EntityList<T extends Entity> extends Array {
+export class EntityList<T extends Entity> extends Array<T> {
     constructor() {
         super();
     }
@@ -175,7 +195,7 @@ export class EntityList<T extends Entity> extends Array {
         });
     }
 
-    draw(cam: Camera) {
+    draw(cam: Viewport) {
         this.forEach((entity) => {
             if (!entity.dead) {
                 entity.draw(cam);
@@ -188,6 +208,22 @@ export class EntityList<T extends Entity> extends Array {
             if (!entity.dead) {
                 entity.update();
             }
+        });
+    }
+
+    doCollision() {
+        this.forEach((entity) => {
+            let collided: Entity[] = [];
+            entity.sections.forEach((section) => {
+                section.forEach((oEntity) => {
+                    if (!collided.includes(oEntity)) {
+                        if (entity.collidesWith(oEntity)) {
+							console.log("test");
+                            entity.doCollision(oEntity);
+                        }
+                    }
+                });
+            });
         });
     }
 }

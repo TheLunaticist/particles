@@ -14,23 +14,45 @@ export function drawImageRelative(
     ctx.drawImage(img, x + canvas.width / 2, y + canvas.height / 2);
 }
 
-export class Camera {
-    constructor(public worldFocus: Vec2) {}
+/**
+ * Class that represents a viewpoint.
+ * It's size is equal to the canvas size.
+ * The center is in the actual middle.
+ */
+export class Viewport {
+    constructor(private center: Vec2) {}
 
-    drawImage(img: HTMLOrSVGImageElement, x: number, y: number) {
-        ctx.drawImage(img, x + this.offsetX, y + this.offsetY);
+    drawImage(img: HTMLOrSVGImageElement, left: number, top: number) {
+        ctx.drawImage(img, this.worldToViewX(left), this.worldToViewY(top));
     }
 
-    fillRect(x: number, y: number, w: number, h: number, colorString: string) {
-        ctx.fillStyle = colorString;
-        ctx.fillRect(x + this.offsetX, y + this.offsetY, w, h);
+    fillRect(left: number, top: number, w: number, h: number, color: string) {
+        ctx.fillStyle = color;
+        ctx.fillRect(this.worldToViewX(left), this.worldToViewY(top), w, h);
     }
 
-    get offsetX() {
-        return canvas.width / 2 - this.worldFocus.x;
+	moveTo(x: number, y: number) {
+		ctx.moveTo(this.worldToViewX(x), this.worldToViewY(y));
+	}
+
+	lineTo(x: number, y: number) {
+		ctx.lineTo(this.worldToViewX(x), this.worldToViewY(y));
+	}
+
+
+    worldToViewX(worldX: number) {
+        return worldX + this.width / 2 - this.center.x;
     }
 
-    get offsetY() {
-        return canvas.height / 2 - this.worldFocus.y;
+    worldToViewY(worldY: number) {
+        return worldY + this.height / 2 - this.center.y;
+    }
+
+    get width() {
+        return canvas.width;
+    }
+
+    get height() {
+        return canvas.height;
     }
 }

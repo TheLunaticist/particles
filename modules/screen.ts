@@ -10,7 +10,12 @@ import { ScreenManager } from "modules/screenManager.js";
 import { Game } from "modules/game.js";
 import { canvas, ctx } from "modules/graphics.js";
 
-export class Screen {
+export enum EventState {
+    CAPTURED,
+    UNCAPTURED,
+}
+
+export abstract class Screen {
     uiElements: UIElement[] = [];
     constructor(public liveRendering: boolean) {}
 
@@ -28,10 +33,12 @@ export class Screen {
         });
     }
 
-    mouseClick(event: MouseEvent): boolean {
-        return this.uiElements.every((element) => {
-            return !(element.mouseClick(event) === false);
-        });
+    mouseClick(event: MouseEvent): EventState {
+        let returnState = this.uiElements.every((element) => {
+            let state: EventState = element.mouseClick(event);
+            return state === EventState.UNCAPTURED;
+        })? EventState.UNCAPTURED : EventState.CAPTURED;
+		return returnState;
     }
 }
 
@@ -122,7 +129,7 @@ export class GameScreen extends Screen {
         Game.doFrame();
     }
 
-    mouseClick(e: MouseEvent): boolean {
+    mouseClick(e: MouseEvent): EventState {
         //forwarding mouse click only if it isn't captured by other ui elements
         let value = super.mouseClick(e);
         if (!value) Game.clickEvent(e);

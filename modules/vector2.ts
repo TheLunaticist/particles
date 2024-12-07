@@ -1,6 +1,5 @@
 "use strict";
 
-//isValid
 export class Vec2 {
     constructor(
         public x: number,

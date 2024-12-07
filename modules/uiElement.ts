@@ -5,6 +5,7 @@ import { Vec2 } from "modules/vector2.js";
 import { ScreenManager } from "modules/screenManager.js";
 import { canvas, ctx } from "modules/graphics.js";
 import { CalledVirtualFunctionError } from "modules/debug.js";
+import { EventState } from "./screen.js";
 
 export enum HorizontalAnchorPoint {
     LEFT,
@@ -30,33 +31,32 @@ export abstract class UIElement {
     offset: Vec2;
     size: Vec2;
     constructor(args: UIELementArgs) {
-		this.horizontal = args.horizontal;
-		this.vertical = args.vertical;
-		this.offset = args.offset;
-		this.size = args.size;
-		
-	}
+        this.horizontal = args.horizontal;
+        this.vertical = args.vertical;
+        this.offset = args.offset;
+        this.size = args.size;
+    }
 
     getAnchorVertical(): number {
-		switch (this.vertical) {
-			case VerticalAnchorPoint.TOP:
-				return 0;
-			case VerticalAnchorPoint.MIDDLE:
-				return canvas.height / 2;
-			case VerticalAnchorPoint.BOTTOM:
-				return canvas.height;
-		}
+        switch (this.vertical) {
+            case VerticalAnchorPoint.TOP:
+                return 0;
+            case VerticalAnchorPoint.MIDDLE:
+                return canvas.height / 2;
+            case VerticalAnchorPoint.BOTTOM:
+                return canvas.height;
+        }
     }
 
     getAnchorHorizontal(): number {
-		switch (this.horizontal) {
-			case HorizontalAnchorPoint.LEFT:
-				return 0;
-			case HorizontalAnchorPoint.MIDDLE:
-				return canvas.width / 2;
-			case HorizontalAnchorPoint.RIGHT:
-				return canvas.width;
-		}
+        switch (this.horizontal) {
+            case HorizontalAnchorPoint.LEFT:
+                return 0;
+            case HorizontalAnchorPoint.MIDDLE:
+                return canvas.width / 2;
+            case HorizontalAnchorPoint.RIGHT:
+                return canvas.width;
+        }
     }
 
     get centerX(): number {
@@ -68,15 +68,14 @@ export abstract class UIElement {
     }
 
     draw() {
-		throw new CalledVirtualFunctionError()
-	}
+        throw new CalledVirtualFunctionError();
+    }
 
     mouseMove(_: MouseEvent) {}
 
-    //return false to mark click as captured
-    mouseClick(_: MouseEvent): boolean {
-		return true;
-	}
+    mouseClick(_: MouseEvent): EventState {
+        return EventState.UNCAPTURED;
+    }
 
     markScreenForRedraw() {
         if (ScreenManager.continueRendering === false) {
@@ -95,14 +94,14 @@ export abstract class UIElement {
 }
 
 export interface UITextArgs extends UIELementArgs {
-	text: string,
+    text: string;
 }
 
 export class UIText extends UIElement {
-	text: string;
-	static new(args: UITextArgs): UIText {
-		return new UIText(args);
-	}
+    text: string;
+    static new(args: UITextArgs): UIText {
+        return new UIText(args);
+    }
     constructor(args: UITextArgs) {
         super(args);
         this.text = args.text;
@@ -130,14 +129,14 @@ export class UIText extends UIElement {
 }
 
 export interface UIButtonArgs extends UIELementArgs {
-	text: string,
-	clickCallback: (e: MouseEvent) => void,
+    text: string;
+    clickCallback: (e: MouseEvent) => void;
 }
 
 export class UIButton extends UIElement {
-	text: string;
-	isHoveredOver: boolean = false;
-	clickCallback: (e: MouseEvent) => void;
+    text: string;
+    isHoveredOver: boolean = false;
+    clickCallback: (e: MouseEvent) => void;
 
     static new(args: UIButtonArgs) {
         return new UIButton(args);
@@ -185,22 +184,37 @@ export class UIButton extends UIElement {
         }
     }
 
-    mouseClick(e: MouseEvent): boolean {
+    mouseClick(e: MouseEvent): EventState {
         if (this.boundRect.isPointInside(new Vec2(e.clientX, e.clientY))) {
-			this.clickCallback(e)
-            return false;
+            this.clickCallback(e);
+            return EventState.CAPTURED;
         }
-		return true;
+        return EventState.UNCAPTURED;
     }
 }
 
-export interface UIIconButton extends UIELementArgs {
-	icon: HTMLOrSVGImageElement,
+export interface UIIconButtonArgs extends UIELementArgs {
+    icon: HTMLOrSVGImageElement;
 }
+
 export class UIIconButton extends UIButton {
+	icon: HTMLOrSVGImageElement;
     constructor(args: UIIconButton) {
         super(args);
         this.icon = args.icon;
-		//TODO
+    }
+
+    mouseClick(e: MouseEvent): EventState {
+        if (this.boundRect.isPointInside(new Vec2(e.clientX, e.clientY))) {
+            this.clickCallback(e);
+			return EventState.CAPTURED;
+        }
+		return EventState.UNCAPTURED;
+    }
+
+    draw(): void {
+        let y = this.getAnchorVertical();
+        let x = this.getAnchorHorizontal();
+        ctx.drawImage(this.icon, x, y - this.size.y - 10);
     }
 }
