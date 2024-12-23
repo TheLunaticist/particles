@@ -151,7 +151,7 @@ export class Tower extends Entity {
     }
 
     constructor(pos: Vec2, type: TowerType, dead: boolean) {
-        super(pos, type, dead);
+        super(pos, type, dead, type.maxHealth);
     }
 
     draw(view: Viewport) {
@@ -167,11 +167,13 @@ export class Tower extends Entity {
     update() {}
 }
 
+interface ProjectileTypeArgs extends TypeArgs {}
+
 export class ProjectileType extends Type {
-    static BALL = new ProjectileType(new Vec2(16, 16));
-    static ROCKET = new ProjectileType(new Vec2(16, 16));
-    constructor(size: Vec2) {
-        super(size, false, 0);
+    static BALL = new ProjectileType({ size: new Vec2(16, 16), maxHealth: 0, hasHealth: false, doCollision: true});
+    static ROCKET = new ProjectileType({ size: new Vec2(16, 16), maxHealth: 0, hasHealth: false, doCollision: true});
+    constructor(args: ProjectileTypeArgs) {
+        super(args);
     }
 }
 
@@ -183,7 +185,7 @@ export class Projectile extends Entity {
         public vel: Vec2,
         public damage: number,
     ) {
-        super(pos, type, dead);
+        super(pos, type, dead, 0);
     }
 
     draw() {}
@@ -191,19 +193,22 @@ export class Projectile extends Entity {
     update() {}
 }
 
+interface EnemyTypeArgs extends TypeArgs {
+	reward: number,
+	isArmored: boolean,
+	maxHealth: number,
+}
 export class EnemyType extends Type {
-    static SMALL = new EnemyType(new Vec2(8, 8), 1, false, 10);
-    static BIG = new EnemyType(new Vec2(16, 16), 2, false, 20);
-    static BOSS = new EnemyType(new Vec2(48, 48), 10, false, 30);
-    static BIG_ARMORED = new EnemyType(new Vec2(18, 18), 4, true, 20);
+    static SMALL = new EnemyType({ size: new Vec2(10, 10), doCollision: true, hasHealth: true, maxHealth: 10, reward: 10, isArmored: false});
+    static BIG = new EnemyType({ size: new Vec2(16, 16), doCollision: true, hasHealth: true, maxHealth: 10, reward: 10, isArmored: false});
 
-    constructor(
-        size: Vec2,
-        public reward: number,
-        public isArmored: boolean,
-        public maxHealth: number,
-    ) {
-        super(size, true, maxHealth);
+	public reward: number;
+	public isArmored: boolean;
+
+    constructor(args: EnemyTypeArgs) {
+		super(args);
+		this.reward = args.reward;
+		this.isArmored = args.isArmored;
     }
 }
 
@@ -214,7 +219,7 @@ export class Enemy extends Entity {
     health: number;
 
     constructor(pos: Vec2, type: EnemyType, dead: boolean) {
-        super(pos, type, dead);
+        super(pos, type, dead, 10);
         this.health = type.maxHealth;
     }
 

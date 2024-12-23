@@ -40,7 +40,7 @@ export class Level {
         this.cm = new CollisionMap(desc.size.x, desc.size.y);
 
         this.buildings.push(
-            Building.newFromCenter(new Vec2(0, 0), BuildingType.HQ, false),
+            Building.newFromCenter(new Vec2(0, 0), BuildingType.HQ, false, 100),
         );
 
         this.enemies.push(
