@@ -6,17 +6,35 @@ import { loadTexture } from "modules/assetManagement.js";
 import { CollisionMap } from "modules/physics.js";
 import { Game } from "modules/game.js";
 
+interface TypeArgs {
+    size: Vec2;
+    doCollision: boolean;
+    hasHealth: boolean;
+    maxHealth: number;
+}
+
 export abstract class Type {
-    constructor(public size: Vec2) {}
+    public size: Vec2;
+    public doCollision: boolean;
+    public hasHealth: boolean;
+    public maxHealth: number;
+
+    constructor(args: TypeArgs) {
+        this.size = args.size;
+        this.doCollision = args.doCollision;
+        this.hasHealth = args.hasHealth;
+        this.maxHealth = args.maxHealth;
+    }
 }
 
 export abstract class Entity {
-    sections: Entity[][] = [];
+    sections: Entity[][] = []; //CollisionMap sections
 
     constructor(
         public pos: Vec2,
         public type: Type,
         public dead: boolean,
+        public health: number,
     ) {}
 
     draw(_: Viewport): void {}
@@ -29,6 +47,24 @@ export abstract class Entity {
         );
     }
 
+    checkForCollisions() {
+        let checkedEntities: Set<Entity> = new Set();
+        checkedEntities.add(this);
+
+        for (const section of this.sections) {
+            for (const entity of section) {
+                if (checkedEntities.has(entity)) {
+                    continue;
+                }
+                if (this.collidesWith(entity)) {
+                    this.doCollisionResults(entity);
+                }
+
+                checkedEntities.add(entity);
+            }
+        }
+    }
+
     collidesWith(e: Entity) {
         return Vec2.doVectorSquaresIntersect(
             this.pos,
@@ -38,15 +74,23 @@ export abstract class Entity {
         );
     }
 
-    doCollision(oEntity: Entity) {}
+    doCollisionResults(oEntity: Entity) {}
 }
+
+interface BuildingTypeArgs extends TypeArgs {}
 
 export class BuildingType extends Type {
     static HQ_TEX = loadTexture("hq.png");
 
-    static HQ = new BuildingType(new Vec2(40, 40));
-    constructor(size: Vec2) {
-        super(size);
+    static HQ = new BuildingType({
+        size: new Vec2(40, 40),
+        doCollision: true,
+        hasHealth: true,
+        maxHealth: 100,
+    });
+
+    constructor(args: BuildingTypeArgs) {
+        super(args);
     }
 
     draw(build: Building, cam: Viewport) {
@@ -58,17 +102,24 @@ export class BuildingType extends Type {
                 throw new Error("Tried to draw a building that doesn't exist.");
         }
     }
+
+    doCollisionResults() {}
 }
 
 export class Building extends Entity {
-	static newFromCenter(centerPos: Vec2, type: BuildingType, dead: boolean): Building {
-		centerPos.x -= type.size.x / 2;
-		centerPos.y -= type.size.y / 2;
-		return new Building(centerPos, type, dead);
-	}
+    static newFromCenter(
+        centerPos: Vec2,
+        type: BuildingType,
+        dead: boolean,
+        health: number,
+    ): Building {
+        centerPos.x -= type.size.x / 2;
+        centerPos.y -= type.size.y / 2;
+        return new Building(centerPos, type, dead, health);
+    }
 
-    constructor(pos: Vec2, type: BuildingType, dead: boolean) {
-        super(pos, type, dead);
+    constructor(pos: Vec2, type: BuildingType, dead: boolean, health: number) {
+        super(pos, type, dead, health);
     }
 
     draw(cam: Viewport) {
@@ -76,27 +127,42 @@ export class Building extends Entity {
     }
 }
 
-class TowerType extends BuildingType {
-    static MG = new TowerType(new Vec2(48, 48), 2, 55, 6);
-    static SNIPER = new TowerType(new Vec2(32, 32), 8, 30, 30);
-    static ROCKET = new TowerType(new Vec2(32, 32), 16, 100, 10);
+interface TowerTypeArgs extends TypeArgs {
+	damage: number,
+	cost: number,
+	maxShootCooldown: number,
+}
 
-    constructor(
-        size: Vec2,
-        public damage: number,
-        public cost: number,
-        public maxShootCooldown: number,
-    ) {
-        super(size);
+export class TowerType extends BuildingType {
+	static MG = new TowerType({ size: new Vec2(48, 48), hasHealth: false, maxHealth: 0, doCollision: false, cost: 55, maxShootCooldown: 6, damage: 2});
+	static SNIPER = new TowerType({ size: new Vec2(32, 32), hasHealth: false, maxHealth: 0, doCollision: false, cost: 30, maxShootCooldown: 30, damage: 8});
+	static ROCKET = new TowerType({ size: new Vec2(32, 32), hasHealth: false, maxHealth: 0, doCollision: false, cost: 100, maxShootCooldown: 10, damage: 16});
+
+    constructor(args: TowerTypeArgs) {
+        super(args);
     }
 }
 
 export class Tower extends Entity {
+    static newFromCenter(center: Vec2, type: TowerType, dead: boolean): Tower {
+        center.x -= type.size.x / 2;
+        center.y -= type.size.y / 2;
+        return new Tower(center, type, dead);
+    }
+
     constructor(pos: Vec2, type: TowerType, dead: boolean) {
         super(pos, type, dead);
     }
 
-    draw() {}
+    draw(view: Viewport) {
+        view.fillRect(
+            this.pos.x,
+            this.pos.y,
+            this.type.size.x,
+            this.type.size.y,
+            "blue",
+        );
+    }
 
     update() {}
 }
@@ -105,7 +171,7 @@ export class ProjectileType extends Type {
     static BALL = new ProjectileType(new Vec2(16, 16));
     static ROCKET = new ProjectileType(new Vec2(16, 16));
     constructor(size: Vec2) {
-        super(size);
+        super(size, false, 0);
     }
 }
 
@@ -137,7 +203,7 @@ export class EnemyType extends Type {
         public isArmored: boolean,
         public maxHealth: number,
     ) {
-        super(size);
+        super(size, true, maxHealth);
     }
 }
 
@@ -212,18 +278,8 @@ export class EntityList<T extends Entity> extends Array<T> {
     }
 
     doCollision() {
-        this.forEach((entity) => {
-            let collided: Entity[] = [];
-            entity.sections.forEach((section) => {
-                section.forEach((oEntity) => {
-                    if (!collided.includes(oEntity)) {
-                        if (entity.collidesWith(oEntity)) {
-							console.log("test");
-                            entity.doCollision(oEntity);
-                        }
-                    }
-                });
-            });
-        });
+        for (const entity of this) {
+            entity.checkForCollisions();
+        }
     }
 }

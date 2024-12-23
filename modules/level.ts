@@ -3,6 +3,7 @@ import { Vec2 } from "modules/vector2.js";
 import { CollisionMap } from "modules/physics.js";
 import {
     Tower,
+	TowerType,
     Projectile,
     ProjectileType,
     Building,
@@ -45,11 +46,15 @@ export class Level {
         this.enemies.push(
             new Enemy(new Vec2(200, 200), EnemyType.SMALL, false),
         );
+
+		this.towers.push(Tower.newFromCenter(new Vec2(50, 50), TowerType.ROCKET, false));
     }
 
     draw() {
         ctx.fillStyle = this.desc.color;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        this.cm.debugDraw(this);
 
         //updating
         this.buildings.draw(this.view);
@@ -57,7 +62,6 @@ export class Level {
         this.enemies.draw(this.view);
         this.projectiles.draw(this.view);
 
-        this.cm.debugDraw(this);
     }
 
     update() {
@@ -69,7 +73,11 @@ export class Level {
         this.enemies.addToCm(this.cm);
         this.projectiles.addToCm(this.cm);
 
-        //updating
+		this.buildings.doCollision();
+		this.towers.doCollision();
+		this.enemies.doCollision();
+		this.projectiles.doCollision();
+
         this.buildings.update();
         this.towers.update();
         this.enemies.update();

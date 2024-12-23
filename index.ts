@@ -13,7 +13,7 @@ try {
 	await finishLoading()
 	ScreenManager.setActiveScreen(ScreenManager.START_SCREEN);
 } catch (error) {
-	//TODO implement graceful exit
+	//TODO possibly implement server backed handling
 	console.log("error happened but wasn't handled")
 	throw error;
 }
