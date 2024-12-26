@@ -41,12 +41,18 @@ export class ScreenManager {
         ScreenManager.GAME_SCREEN = new GameScreen();
         ScreenManager.END_SCREEN = new EndScreen();
 
+
         window.addEventListener("resize", (_: UIEvent) => {
             let clientRect = canvas.getClientRects()[0];
             canvas.width = clientRect.width;
             canvas.height = clientRect.height;
             ScreenManager.activeScreen?.draw();
         });
+
+		window.addEventListener("scroll", (e) => {
+			console.log("Test");
+			e.preventDefault();	
+		}, false);
 
         canvas.addEventListener("mousemove", (e) => {
             ScreenManager.activeScreen?.mouseMove(e);

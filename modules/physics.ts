@@ -103,9 +103,11 @@ export class CollisionMap {
             x < this.chSizeX &&
             y < this.chSizeY
         ) {
-            const section = this.columns[x][y];
-            section.push(entity);
-            entity.sections.push(section);
+			if(x >= 0 && x < this.chNumX && y >= 0 && y < this.chNumY) {
+				const section = this.columns[x][y];
+				section.push(entity);
+				entity.sections.push(section);
+			}
         }
     }
 

@@ -44,10 +44,10 @@ export class Level {
         );
 
         this.enemies.push(
-            new Enemy(new Vec2(200, 200), EnemyType.SMALL, false),
+            new Enemy(new Vec2(400, 0), EnemyType.SMALL, false),
         );
 
-		this.towers.push(Tower.newFromCenter(new Vec2(50, 50), TowerType.ROCKET, false));
+		this.towers.push(Tower.newFromCenter(new Vec2(200, -50), TowerType.ROCKET, false));
     }
 
     draw() {
