@@ -20,7 +20,7 @@ export function drawImageRelative(
  * The center is in the actual middle.
  */
 export class Viewport {
-    constructor(private center: Vec2) {}
+    constructor(public center: Vec2) {}
 
     drawImage(img: HTMLOrSVGImageElement, left: number, top: number) {
         ctx.drawImage(img, this.worldToViewX(left), this.worldToViewY(top));

@@ -41,7 +41,6 @@ export class ScreenManager {
         ScreenManager.GAME_SCREEN = new GameScreen();
         ScreenManager.END_SCREEN = new EndScreen();
 
-
         window.addEventListener("resize", (_: UIEvent) => {
             let clientRect = canvas.getClientRects()[0];
             canvas.width = clientRect.width;
@@ -49,29 +48,27 @@ export class ScreenManager {
             ScreenManager.activeScreen?.draw();
         });
 
-		window.addEventListener("scroll", (e) => {
-			console.log("Test");
-			e.preventDefault();	
-		}, false);
-
-        canvas.addEventListener("mousemove", (e) => {
-            ScreenManager.activeScreen?.mouseMove(e);
-
-            if (ScreenManager.markedForRedraw) {
-                ScreenManager.activeScreen!.draw();
-                ScreenManager.markedForRedraw = false;
-            }
+        //input forwarding to active screen
+        canvas.addEventListener("mousemove", (event) => {
+            ScreenManager.activeScreen?.mouseMoveEvent(event);
+			ScreenManager.redrawIfShould();
         });
 
-        canvas.addEventListener("mouseup", (e) => {
-            this.activeScreen?.mouseClick(e);
+        canvas.addEventListener("mouseup", (event) => {
+            this.activeScreen?.mouseUpEvent(event);
+			ScreenManager.redrawIfShould();
+        });
+
+        canvas.addEventListener("mousedown", (event) => {
+            this.activeScreen?.mouseDownEvent(event);
+			ScreenManager.redrawIfShould();
         });
     }
 
     static renderLoop() {
         ScreenManager.evenFrame = !ScreenManager.evenFrame;
         if (!ScreenManager.evenFrame) {
-			ScreenManager.activeScreen?.draw();
+            ScreenManager.activeScreen?.draw();
         }
 
         if (ScreenManager.continueRendering)
@@ -80,8 +77,18 @@ export class ScreenManager {
             );
     }
 
+    //a window can request a redraw by calling the mark for redraw function
     static markForRedraw() {
-        ScreenManager.markedForRedraw = true;
+		if(!ScreenManager.continueRendering){
+			ScreenManager.markedForRedraw = true;
+		}
+    }
+
+    static redrawIfShould() {
+        if (ScreenManager.markedForRedraw) {
+            ScreenManager.activeScreen!.draw();
+            ScreenManager.markedForRedraw = false;
+        }
     }
 }
 

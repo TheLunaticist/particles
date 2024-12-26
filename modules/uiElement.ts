@@ -30,6 +30,7 @@ export abstract class UIElement {
     vertical: VerticalAnchorPoint;
     offset: Vec2;
     size: Vec2;
+
     constructor(args: UIELementArgs) {
         this.horizontal = args.horizontal;
         this.vertical = args.vertical;
@@ -67,21 +68,13 @@ export abstract class UIElement {
         return this.getAnchorVertical() + this.offset.y;
     }
 
-    draw() {
-        throw new CalledVirtualFunctionError();
-    }
+    abstract draw(): void;
 
-    mouseMove(_: MouseEvent) {}
+    mouseMoveEvent(_: MouseEvent) {}
 
-    mouseClick(_: MouseEvent): EventState {
-        return EventState.UNCAPTURED;
-    }
+    mouseDownEvent(_: MouseEvent) {}
 
-    markScreenForRedraw() {
-        if (ScreenManager.continueRendering === false) {
-            ScreenManager.markForRedraw();
-        }
-    }
+	mouseUpEvent(_: MouseEvent) {}
 
     get boundRect() {
         return new Rect(
@@ -168,28 +161,26 @@ export class UIButton extends UIElement {
         );
     }
 
-    mouseMove(e: MouseEvent) {
+    mouseMoveEvent(e: MouseEvent) {
         let buttonRect = this.boundRect;
         let mousePos = new Vec2(e.clientX, e.clientY);
         if (this.isHoveredOver === false) {
             if (buttonRect.isPointInside(mousePos)) {
                 this.isHoveredOver = true;
-                this.markScreenForRedraw();
+				ScreenManager.markForRedraw();
             }
         } else {
             if (!buttonRect.isPointInside(mousePos)) {
                 this.isHoveredOver = false;
-                this.markScreenForRedraw();
+				ScreenManager.markForRedraw();
             }
         }
     }
 
-    mouseClick(e: MouseEvent): EventState {
+    mouseDownEvent(e: MouseEvent) {
         if (this.boundRect.isPointInside(new Vec2(e.clientX, e.clientY))) {
             this.clickCallback(e);
-            return EventState.CAPTURED;
         }
-        return EventState.UNCAPTURED;
     }
 }
 
@@ -198,18 +189,16 @@ export interface UIIconButtonArgs extends UIELementArgs {
 }
 
 export class UIIconButton extends UIButton {
-	icon: HTMLOrSVGImageElement;
+    icon: HTMLOrSVGImageElement;
     constructor(args: UIIconButton) {
         super(args);
         this.icon = args.icon;
     }
 
-    mouseClick(e: MouseEvent): EventState {
+    mouseDownEvent(e: MouseEvent) {
         if (this.boundRect.isPointInside(new Vec2(e.clientX, e.clientY))) {
             this.clickCallback(e);
-			return EventState.CAPTURED;
         }
-		return EventState.UNCAPTURED;
     }
 
     draw(): void {

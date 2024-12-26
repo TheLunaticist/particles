@@ -27,19 +27,24 @@ export abstract class Screen {
 
     open() {}
     close() {}
-    mouseMove(e: MouseEvent) {
-        this.uiElements.forEach((element) => {
-            element.mouseMove(e);
-        });
-    }
 
-    mouseClick(event: MouseEvent): EventState {
-        let returnState = this.uiElements.every((element) => {
-            let state: EventState = element.mouseClick(event);
-            return state === EventState.UNCAPTURED;
-        })? EventState.UNCAPTURED : EventState.CAPTURED;
-		return returnState;
-    }
+    mouseMoveEvent(event: MouseEvent) {
+		for(const elem of this.uiElements) {
+			elem.mouseMoveEvent(event);
+		}
+	}
+
+    mouseUpEvent(event: MouseEvent) {
+		for(const elem of this.uiElements) {
+			elem.mouseUpEvent(event);
+		}
+	}
+
+    mouseDownEvent(event: MouseEvent) {
+		for(const elem of this.uiElements) {
+			elem.mouseDownEvent(event);
+		}
+	}
 }
 
 export class StartScreen extends Screen {
@@ -110,13 +115,17 @@ export class EndScreen extends Screen {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         super.draw();
     }
-
     open() {
         this.draw();
     }
 }
 
 export class GameScreen extends Screen {
+    isMouseDown: boolean = false;
+    isMoveDragging: boolean = false;
+	lastDragX: number = 0;
+	lastDragY: number = 0;
+
     constructor() {
         super(true);
     }
@@ -129,10 +138,24 @@ export class GameScreen extends Screen {
         Game.doFrame();
     }
 
-    mouseClick(e: MouseEvent): EventState {
-        //forwarding mouse click only if it isn't captured by other ui elements
-        let value = super.mouseClick(e);
-        if (!value) Game.clickEvent(e);
-        return value;
+    mouseUpEvent(e: MouseEvent): void {
+        this.isMouseDown = false;
     }
+
+    mouseDownEvent(event: MouseEvent): void {
+        this.isMouseDown = true;
+		this.isMoveDragging = !Game.checkMouseInteract();
+		if(this.isMoveDragging) {
+			this.lastDragX = event.clientX;
+			this.lastDragY = event.clientY;
+		}
+    }
+
+	mouseMoveEvent(event: MouseEvent): void {
+		if(this.isMouseDown && this.isMoveDragging) {
+			Game.moveView(event.clientX - this.lastDragX, event.clientY - this.lastDragY);
+			this.lastDragX = event.clientX;
+			this.lastDragY = event.clientY;
+		}
+	}
 }
