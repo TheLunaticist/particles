@@ -17,7 +17,6 @@ export function drawImageRelative(
 /**
  * Class that represents a viewpoint.
  * It's size is equal to the canvas size.
- * The center is in the actual middle.
  */
 export class Viewport {
     constructor(public center: Vec2) {}

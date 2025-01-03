@@ -4,8 +4,7 @@ import { Rect } from "modules/rectangle.js";
 import { Vec2 } from "modules/vector2.js";
 import { ScreenManager } from "modules/screenManager.js";
 import { canvas, ctx } from "modules/graphics.js";
-import { CalledVirtualFunctionError } from "modules/debug.js";
-import { EventState } from "./screen.js";
+import { loadTexture } from "modules/assetManagement.js";
 
 export enum HorizontalAnchorPoint {
     LEFT,
@@ -202,8 +201,8 @@ export class UIIconButton extends UIButton {
     }
 
     draw(): void {
-        let y = this.getAnchorVertical();
         let x = this.getAnchorHorizontal();
-        ctx.drawImage(this.icon, x, y - this.size.y - 10);
+        let y = this.getAnchorVertical();
+        ctx.drawImage(this.icon, x, y, this.size.x, this.size.y);
     }
 }
